@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="mysql-pu">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <properties>
+            <!-- Database Connection (Matches Docker Port 3333) -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="jakarta.persistence.jdbc.url"    value="jdbc:mysql://localhost:3333/bookstore" />
+            <property name="jakarta.persistence.jdbc.user"   value="csd214" />
+            <property name="jakarta.persistence.jdbc.password" value="itstudies12345" />
+
+            <!-- Hibernate Settings -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+            <property name="hibernate.show_sql" value="true" />
+            <!-- This auto-creates tables for your entities -->
+            <property name="hibernate.hbm2ddl.auto" value="create" />
+        </properties>
+    </persistence-unit>
+
+    <!-- UNIT 2: Local H2 (In-Memory SQL) -->
+    <persistence-unit name="h2-pu">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <properties>
+            <!-- Database Connection Settings -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
+            <property name="jakarta.persistence.jdbc.url"    value="jdbc:h2:mem:bookstore_db;DB_CLOSE_DELAY=-1" />
+            <property name="jakarta.persistence.jdbc.user"   value="sa" />
+            <property name="jakarta.persistence.jdbc.password" value="" />
+
+            <!-- Hibernate Engine Settings -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect" />
+
+            <!-- Schema Strategy (create-drop: wipes the DB every time the JVM stops) -->
+            <property name="hibernate.hbm2ddl.auto" value="create-drop" />
+            <property name="hibernate.show_sql" value="true" />
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -1,0 +1,3948 @@
+CONTEXT FOR AI MODEL
+Generated from: C:\Users\fcarella\IdeaProjects\_csd214\s26\lecture-7\csd214-s26-lecture7-repositories
+Timestamp: 2026-06-16-10-34
+
+--- PROJECT STRUCTURE ---
+|-- csd214-s26-lecture7-repositories/
+    |-- .files2ignore
+    |-- .gitignore
+    |-- docker-compose.yml
+    |-- documentation/
+        |-- bookstore-2026-01-30-142617.png
+        |-- bookstore-2026-01-30-142628.mmd
+        |-- niche.mmd
+        |-- niche.pdf
+        |-- niche.png
+        |-- uml1.mmd
+        |-- uml2.mmd
+    |-- pom.xml
+    |-- README.md
+    |-- src/
+        |-- main/
+            |-- java/
+                |-- bookstore/
+                    |-- App.java
+                    |-- entities/
+                        |-- BatteryEntity.java
+                        |-- BookEntity.java
+                        |-- DiscMagEntity.java
+                        |-- MagazineEntity.java
+                        |-- ProductEntity.java
+                        |-- PublicationEntity.java
+                        |-- TicketEntity.java
+                        |-- TireEntity.java
+                        |-- VehiclePartEntity.java
+                    |-- jdbc/
+                        |-- JdbcBookApp.java
+                        |-- JdbcFullApp.java
+                        |-- JdbcWidgetApp.java
+                    |-- jpa/
+                        |-- JpaAutomotiveApp.java
+                        |-- JpaBookApp.java
+                    |-- Main.java
+                    |-- pojos/
+                        |-- Battery.java
+                        |-- Book.java
+                        |-- CashTill.java
+                        |-- DiscMag.java
+                        |-- Editable.java
+                        |-- Magazine.java
+                        |-- Product.java
+                        |-- Publication.java
+                        |-- SaleableItem.java
+                        |-- Ticket.java
+                        |-- Tire.java
+                        |-- VehiclePart.java
+                        |-- Widget.java
+                    |-- repositories/
+                        |-- IRepository.java
+                        |-- ProductRepository.java
+                        |-- RepositoryApp.java
+            |-- resources/
+                |-- META-INF/
+                    |-- persistence.xml
+        |-- test/
+            |-- java/
+                |-- bookstore/
+                    |-- AppTest.java
+                    |-- pojos/
+                        |-- BatteryTest.java
+                        |-- BookTest.java
+                        |-- TireTest.java
+
+--------------------------------------------------
+
+--- FILE: .gitignore ---
+```
+target/
+volumes/
+*.sh
+
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+```
+
+--- FILE: docker-compose.yml ---
+```
+services:
+  db:
+    image: mysql:8.0 # You can specify bookstore-2026-01-30.mmd different version if needed
+    environment:
+      MYSQL_ROOT_PASSWORD: itstudies12345 # Replace with bookstore-2026-01-30.mmd strong password
+      MYSQL_DATABASE: bookstore # Replace with your desired database name
+      MYSQL_USER: csd214 # Replace with your desired username
+      MYSQL_PASSWORD: itstudies12345 # Replace with bookstore-2026-01-30.mmd strong password
+    ports:
+      - "3333:3306" # Maps port 3333 on your host to port 3306 in the container
+    volumes:
+      # - db_data:/var/lib/mysql # Persists data to bookstore-2026-01-30.mmd named volume
+      - ./volumes/mysql:/var/lib/mysql # persists data to folder in the current folder
+      # You can also mount bookstore-2026-01-30.mmd custom MySQL configuration file if needed:
+      # - ./my.cnf:/etc/mysql/my.cnf
+    restart: always
+
+volumes:
+  db_data: # Define the named volume
+
+```
+
+--- FILE: documentation/bookstore-2026-01-30-142628.mmd ---
+```
+classDiagram
+    SaleableItem <|.. Editable
+    Serializable <|.. Editable
+    Editable <|-- Product
+    Product <|-- Ticket
+    Product <|-- Publication
+    Publication <|-- Book
+    Publication <|-- Magazine
+    Magazine <|-- DiscMag
+
+    Product <-- CashTill
+
+    class SaleableItem {
+        <<interface>>
+        +sellItem()
+        +getPrice() double
+    }
+
+    class Serializable {
+        <<interface>>
+    }
+
+    class Editable {
+        <<abstract>>
+        +edit(Scanner input)*
+        +initialize(Scanner input)*
+        +getInput(Scanner input, String defaultValue) String
+        +getInput(Scanner input, int defaultValue) int
+        +getInput(Scanner input, double defaultValue) double
+        +getInput(Scanner input, boolean defaultValue) boolean
+        +getInput(Scanner input, Date defaultValue) Date
+    }
+
+    class Product {
+        <<abstract>>
+        -String productId
+        +getProductId() String
+        +setProductId(String productId)
+    }
+
+    class Ticket {
+        +String description
+        +double price
+        +sellItem()
+        +getPrice() double
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +toString() String
+    }
+
+    class Publication {
+        <<Abstract>>
+        -String title
+        -double price
+        -int copies
+        +Publication()
+        +Publication(String title, double price, int copies)
+        +getPrice() double
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +toString() String
+        +equals(Object o) boolean
+        +hashCode() int
+    }
+
+    class Book {
+        -String author
+        +Book()
+        +Book(String author)
+        +Book(String author, String title, double price, int copies)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+        +toString() String
+        +equals(Object o) boolean
+        +hashCode() int
+    }
+
+    class Magazine {
+        -int orderQty
+        -Date currentIssue
+        +Magazine()
+        +Magazine(int orderQty, Date currentIssue, String title, double price, int copies)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+        +toString() String
+    }
+
+    class DiscMag {
+        -boolean hasDisc
+        +DiscMag()
+        +DiscMag(boolean hasDisc, int orderQty, Date currentIssue, String title, double price, int copies)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+        +toString() String
+    }
+
+    class CashTill {
+        -double runningTotal
+        +CashTill()
+        +showTotal()
+        +sellItem(SaleableItem item)
+        +getRunningTotal() double
+    }
+```
+
+--- FILE: documentation/niche.mmd ---
+```
+classDiagram
+    SaleableItem <|.. Editable
+    Serializable <|.. Editable
+    Editable <|-- Product
+    Product <|-- VehiclePart
+    VehiclePart <|-- Tire
+    VehiclePart <|-- Battery
+
+    class SaleableItem {
+        <<interface>>
+        +sellItem()
+        +getPrice() double
+    }
+
+    class Editable {
+        <<abstract>>
+        +edit(Scanner input)*
+        +initialize(Scanner input)*
+    }
+
+    class Product {
+        <<abstract>>
+        -String productId
+    }
+
+    class VehiclePart {
+        <<abstract>>
+        -String manufacturer
+        -double price
+        +VehiclePart()
+        +VehiclePart(String manufacturer, double price)
+        +getPrice() double
+    }
+
+    class Tire {
+        -int diameter
+        +Tire()
+        +Tire(int diameter, String manufacturer, double price)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+    }
+
+    class Battery {
+        -int coldCrankingAmps
+        +Battery()
+        +Battery(int cca, String manufacturer, double price)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+    }
+
+    class CashTill {
+        +sellItem(SaleableItem item)
+    }
+
+    Product <-- CashTill
+```
+
+--- FILE: documentation/uml1.mmd ---
+```
+classDiagram
+%% --- LAYER 1: Base Class ---
+    class Vehicle {
+        <<Abstract>>
+        +String manufacturer
+        +int year
+        +start()
+        +stop()
+    }
+
+%% --- LAYER 2: Categories ---
+    class LandVehicle {
+        +int numWheels
+        +String transmissionType
+        +drive()
+    }
+
+    class WaterCraft {
+        +float displacement
+        +bool isMotorized
+        +float()
+    }
+
+    class Aircraft {
+        +int maxAltitude
+        +int numEngines
+        +fly()
+    }
+
+%% --- LAYER 3: Specific Types ---
+    class Car {
+        +int numDoors
+        +bool isConvertible
+        +openTrunk()
+    }
+
+    class Motorcycle {
+        +bool hasSidecar
+        +popWheelie()
+    }
+
+    class Yacht {
+        +int numCabins
+        +bool hasHelipad
+        +dropAnchor()
+    }
+
+    class JetPlane {
+        +float wingspan
+        +retractLandingGear()
+    }
+
+%% --- Relationships (Inheritance) ---
+%% Syntax: Parent <|-- Child
+
+    Vehicle <|-- LandVehicle
+    Vehicle <|-- WaterCraft
+    Vehicle <|-- Aircraft
+
+    LandVehicle <|-- Car
+    LandVehicle <|-- Motorcycle
+
+    WaterCraft <|-- Yacht
+
+    Aircraft <|-- JetPlane
+```
+
+--- FILE: documentation/uml2.mmd ---
+```
+classDiagram
+%% Base
+    class ElectronicDevice {
+        <<Abstract>>
+        -String serialNumber
+        -double price
+        +turnOn()
+    }
+
+%% Category
+    class Computer extends ElectronicDevice {
+-int ramSizeGB
+-String processor
+}
+
+%% Specific
+class Laptop extends Computer {
+-double batteryLifeHours
+}
+
+```
+
+--- FILE: pom.xml ---
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>app</groupId>
+    <artifactId>bookstore-2026-01-30</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <!-- ... existing dependencies ... -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.2.0</version>
+        </dependency>
+        <!-- Hibernate / JPA -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.6.1.Final</version>
+        </dependency>
+    </dependencies>
+
+</project>
+```
+
+--- FILE: README.md ---
+```
+***
+
+## 🛑 CSD214 S26 Lecture 5:  Introduction to JDBC, Raw SQL and in class exercise
+This repository serves as the official base for the **Lecture 5 In-Class Exercise**. Building upon the Object-Oriented foundations established in previous weeks, we are now transitioning from volatile, in-memory storage (ArrayLists) to persistent storage using **MySQL** and **JDBC (Java Database Connectivity)**.
+
+### **JDBC Implementation Overview**
+The `bookstore.jdbc` package contains new logic that demonstrates the lifecycle of data within a professional Java application:
+
+*   **Database Infrastructure:** Utilizes the provided `docker-compose.yml` to spin up a containerized MySQL 8.0 instance.
+*   **CRUD Operations:** `JdbcBookApp.java` provides a blueprint for the **Create, Read, Update, and Delete** cycle using `PreparedStatement` to ensure protection against SQL Injection attacks.
+*   **Object-Relational Bridging:** `JdbcFullApp.java` demonstrates how to "rehydrate" Java objects from database rows, execute business logic (such as `sellItem()`), and synchronize those changes back to the database.
+*   **Dependency Management:** The `pom.xml` has been updated with the necessary MySQL Connector/J drivers to facilitate communication between the JVM and the database container.
+
+**Goal:** By the end of this exercise, you will understand how to replace a temporary `ArrayList` with a robust, persistent database while maintaining the integrity of your existing class hierarchy.
+
+***
+***
+
+# Bookstore CLI Application
+- for the csd214 course summer 26 delivery : [course outline](https://welearn.saultcollege.ca/shared/CourseOutlines/csd214_Course_Outline.pdf) 
+> - [git repository](https://github.com/fcarella/lab1-exercise-fred-carella-csd214-s26)
+> - [based on bookstore (git repository): ](https://github.com/fcarella/bookstore-2026-01-30)
+> - [this exercise is covered in this lecture...](https://docs.google.com/document/d/1N8mfXnbmEHYcpEE1G3YnafFOytEmAnNpJvF6KsBTht0/edit?usp=sharing)
+- A console-based Java application for managing a bookstore inventory, performing sales, and tracking cash flow. This project demonstrates object-oriented programming concepts including inheritance, polymorphism, and interface implementation in Java 24.
+
+## Features
+
+*   **Inventory Management:**
+    *   **Books:** Manage items with Title, Author, Price, and Copies.
+    *   **Magazines:** Manage periodicals with Order Quantity and Issue Date.
+    *   **Disc Magazines:** Specialized magazines that include a disc.
+    *   **Tickets:** Simple saleable items with a description and price.
+    *   **Vehicle Parts (Lab 1 Exercise):** Expanded inventory to include **Tires** (Diameter) and **Batteries** (Cold Cranking Amps) via a new Automotive hierarchy.
+*   **CRUD Operations:** Add, Edit, and Delete items from the inventory.
+*   **Sales System:** Sell items to decrement inventory count and increase the Cash Till total.
+*   **Data Generation:** Uses `JavaFaker` to populate the inventory with realistic dummy data for both Bookstore and Auto-Shop departments.
+*   **Menu System:** Interactive console menu for navigation.
+
+## Class Hierarchy
+
+![Class Diagram](documentation/bookstore-2026-01-30-142617.png)
+
+The hierarchy implements the following structure:
+*   **SaleableItem (Interface):** Defines `sellItem()` and `getPrice()`.
+*   **Editable (Abstract):** Handles console input/output and parsing.
+*   **Publication:** Base class for Books and Magazines (Title, Price, Copies).
+*   **VehiclePart (Lab 1 Exercise):** Base abstract class for the automotive department (Manufacturer, Price).
+    *   `Tire` and `Battery` concrete classes implement specific automotive attributes.
+
+## Prerequisites
+
+*   **Java JDK:** Version 24
+*   **Maven:** 3.6+
+
+## Dependencies
+
+*   [JavaFaker](https://github.com/DiUS/java-faker) (1.0.2): For generating random test data.
+*   [JUnit 5](https://junit.org/junit5/) (5.10.0): For unit testing.
+
+## How to Run
+
+1.  **Compile the project:**
+    ```bash
+    mvn clean compile
+    ```
+
+2.  **Run the application:**
+    ```bash
+    mvn exec:java -Dexec.mainClass="bookstore.Main"
+    ```
+
+## Usage
+
+Upon starting, the application will populate the list with random data. You will see the following menu:
+
+```text
+***********************
+ 1. Add Items
+ 2. Edit Items
+ 3. Delete Items
+ 4. Sell item(s)
+ 5. List items
+99. Quit
+***********************
+```
+
+*   **Add Items:** Choose a specific type (Book, Magazine, Tire, Battery, etc.) and follow the prompts.
+*   **Edit Items:** Select an index from the list to modify fields.
+*   **Sell Items:** Select an index to sell. This decreases the 'Copies' count (for Publications) and adds the price to the internal Cash Till.
+
+## Running Tests
+
+Unit tests are implemented using JUnit 5 to verify the logic of POJOs and input mocking.
+
+Run the tests using Maven:
+
+```bash
+mvn test
+```
+
+## Project Structure
+
+```
+src/
+├── main/
+│   └── java/
+│       └── bookstore/
+│           ├── Main.java           # Entry point
+│           ├── App.java            # Controller / Menu Logic
+│           └── pojos/              # Data Models
+│               ├── Editable.java
+│               ├── SaleableItem.java
+│               ├── Product.java
+│               ├── Publication.java
+│               ├── Book.java
+│               ├── Magazine.java
+│               ├── DiscMag.java
+│               ├── Ticket.java
+│               ├── VehiclePart.java    # New Lab 1 Parent
+│               ├── Tire.java           # New Lab 1 Child
+│               ├── Battery.java        # New Lab 1 Child
+│               └── CashTill.java
+└── test/
+    └── java/
+        └── bookstore/
+            └── pojos/              # Unit Tests
+```
+```
+
+--- FILE: src/main/java/bookstore/App.java ---
+```
+package bookstore;
+
+import bookstore.entities.*;
+import bookstore.pojos.*;
+import bookstore.repositories.IRepository;
+import bookstore.repositories.ProductRepository;
+import com.github.javafaker.Faker;
+
+import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+public class App {
+    private final IRepository<ProductEntity> repository = new ProductRepository();
+    private final CashTill cashTill = new CashTill();
+    private final Scanner input = new Scanner(System.in);
+
+    public void run() {
+        populate();
+        int choice = 0;
+        while (choice != 99) {
+            System.out.println("\n***********************");
+            System.out.println(" 1. Add Items (Repository Save)");
+            System.out.println(" 2. Edit Items (Repository Save/Update)");
+            System.out.println(" 3. Delete Items (Repository Delete)");
+            System.out.println(" 4. Sell item(s) (Logic & Repo Sync)");
+            System.out.println(" 5. List items (Polymorphic Filtering)");
+            System.out.println("99. Quit");
+            System.out.println("***********************");
+            System.out.print("Enter choice: \n");
+
+            try {
+                String line = input.nextLine();
+                if (line.trim().isEmpty()) continue;
+                choice = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input.");
+                choice = 0;
+            }
+
+            switch (choice) {
+                case 1: addItem(); break;
+                case 2: editItem(); break;
+                case 3: deleteItem(); break;
+                case 4: sellItem(); break;
+                case 5: listAny(); break;
+                case 99: break;
+                default: System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    public void shutdown() {
+        repository.close();
+        System.out.println("Database connections closed safely.");
+    }
+
+    public void addItem() {
+        int choice = 0;
+        while (choice != 99) {
+            System.out.println("\nAdd an item\n");
+            System.out.println("1. Add Book");
+            System.out.println("2. Add Magazine");
+            System.out.println("3. Add DiscMag");
+            System.out.println("4. Add Ticket");
+            System.out.println("5. Add Tire");
+            System.out.println("6. Add Battery");
+            System.out.println("99. Exit");
+
+            try {
+                String line = input.nextLine();
+                if (line.trim().isEmpty()) continue;
+                choice = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                choice = 0;
+            }
+
+            if (choice == 99) return;
+
+            Editable item = null;
+            switch(choice) {
+                case 1: item = new Book(); break;
+                case 2: item = new Magazine(); break;
+                case 3: item = new DiscMag(); break;
+                case 4: item = new Ticket(); break;
+                case 5: item = new Tire(); break;
+                case 6: item = new Battery(); break;
+                default: System.out.println("Invalid selection."); continue;
+            }
+
+            item.initialize(this.input);
+            saveToDb(item);
+        }
+    }
+
+    private void saveToDb(Editable item) {
+        ProductEntity entity = null;
+        if (item instanceof Book) {
+            entity = ((Book) item).toEntity();
+        } else if (item instanceof DiscMag) {
+            entity = ((DiscMag) item).toEntity();
+        } else if (item instanceof Magazine) {
+            entity = ((Magazine) item).toEntity();
+        } else if (item instanceof Ticket) {
+            entity = ((Ticket) item).toEntity();
+        } else if (item instanceof Battery) {
+            entity = ((Battery) item).toEntity();
+        } else if (item instanceof Tire) {
+            entity = ((Tire) item).toEntity();
+        }
+
+        if (entity != null) {
+            try {
+                repository.save(entity);
+                System.out.println("Successfully saved to Database via Repository!");
+            } catch (Exception e) {
+                System.out.println("Error saving entity: " + e.getMessage());
+            }
+        }
+    }
+
+    public void listAny() {
+        int choice = 0;
+        while (choice != 99) {
+            System.out.println("\nAll Items");
+            System.out.println("-----------");
+            System.out.println("List Options");
+            System.out.println("1. All Products");
+            System.out.println("2. Books Only");
+            System.out.println("3. Magazines Only");
+            System.out.println("4. DiscMags Only");
+            System.out.println("5. Tickets Only");
+            System.out.println("6. Tires Only");
+            System.out.println("7. Batteries Only");
+            System.out.println("99. Exit");
+
+            try {
+                String line = input.nextLine();
+                if (line.trim().isEmpty()) continue;
+                choice = Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                choice = 0;
+            }
+
+            if (choice == 99) return;
+
+            Class<? extends ProductEntity> filterClass = null;
+            switch(choice) {
+                case 1: filterClass = ProductEntity.class; break;
+                case 2: filterClass = BookEntity.class; break;
+                case 3: filterClass = MagazineEntity.class; break;
+                case 4: filterClass = DiscMagEntity.class; break;
+                case 5: filterClass = TicketEntity.class; break;
+                case 6: filterClass = TireEntity.class; break;
+                case 7: filterClass = BatteryEntity.class; break;
+                default: System.out.println("Invalid selection."); continue;
+            }
+
+            // High-Level collection filtering style [6]
+            List<ProductEntity> dbEntities = repository.findAll();
+            for (ProductEntity entity : dbEntities) {
+                if (!filterClass.isInstance(entity)) {
+                    continue;
+                }
+                if (filterClass == MagazineEntity.class && entity instanceof DiscMagEntity) {
+                    continue;
+                }
+                printEntityAsDto(entity);
+            }
+        }
+    }
+
+    private void printEntityAsDto(ProductEntity entity) {
+        if (entity instanceof BookEntity) {
+            System.out.println(Book.fromEntity((BookEntity) entity));
+        } else if (entity instanceof DiscMagEntity) {
+            System.out.println(DiscMag.fromEntity((DiscMagEntity) entity));
+        } else if (entity instanceof MagazineEntity) {
+            System.out.println(Magazine.fromEntity((MagazineEntity) entity));
+        } else if (entity instanceof TicketEntity) {
+            System.out.println(Ticket.fromEntity((TicketEntity) entity));
+        } else if (entity instanceof BatteryEntity) {
+            System.out.println(Battery.fromEntity((BatteryEntity) entity));
+        } else if (entity instanceof TireEntity) {
+            System.out.println(Tire.fromEntity((TireEntity) entity));
+        }
+    }
+
+    public void editItem() {
+        List<ProductEntity> entities = repository.findAll();
+        if (entities.isEmpty()) {
+            System.out.println("No records found to edit.");
+            return;
+        }
+
+        System.out.println("Select item index to edit (0 to " + (entities.size() - 1) + "):");
+        for (int i = 0; i < entities.size(); i++) {
+            System.out.print(i + ". ");
+            printEntityAsDto(entities.get(i));
+        }
+
+        try {
+            int idx = Integer.parseInt(input.nextLine().trim());
+            if (idx >= 0 && idx < entities.size()) {
+                ProductEntity entity = entities.get(idx);
+                ProductEntity updatedEntity = null;
+
+                if (entity instanceof BookEntity) {
+                    Book dto = Book.fromEntity((BookEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof DiscMagEntity) {
+                    DiscMag dto = DiscMag.fromEntity((DiscMagEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof MagazineEntity) {
+                    Magazine dto = Magazine.fromEntity((MagazineEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof TicketEntity) {
+                    Ticket dto = Ticket.fromEntity((TicketEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof BatteryEntity) {
+                    Battery dto = Battery.fromEntity((BatteryEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof TireEntity) {
+                    Tire dto = Tire.fromEntity((TireEntity) entity);
+                    dto.edit(this.input);
+                    updatedEntity = dto.toEntity();
+                }
+
+                if (updatedEntity != null) {
+                    repository.save(updatedEntity);
+                    System.out.println("Successfully updated the database via Repository.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid selection or transaction error: " + e.getMessage());
+        }
+    }
+
+    public void deleteItem() {
+        List<ProductEntity> entities = repository.findAll();
+        if (entities.isEmpty()) {
+            System.out.println("No records found to delete.");
+            return;
+        }
+
+        System.out.println("Select item index to delete:");
+        for (int i = 0; i < entities.size(); i++) {
+            System.out.print(i + ". ");
+            printEntityAsDto(entities.get(i));
+        }
+
+        try {
+            int idx = Integer.parseInt(input.nextLine().trim());
+            if (idx >= 0 && idx < entities.size()) {
+                ProductEntity entity = entities.get(idx);
+                repository.delete(entity.getId());
+                System.out.println("Successfully deleted from DB via Repository.");
+            }
+        } catch (Exception e) {
+            System.out.println("Deletion error: " + e.getMessage());
+        }
+    }
+
+    public void sellItem() {
+        List<ProductEntity> entities = repository.findAll();
+        if (entities.isEmpty()) {
+            System.out.println("No inventory found to sell.");
+            return;
+        }
+
+        System.out.println("Select item index to sell:");
+        for (int i = 0; i < entities.size(); i++) {
+            System.out.print(i + ". ");
+            printEntityAsDto(entities.get(i));
+        }
+
+        try {
+            int idx = Integer.parseInt(input.nextLine().trim());
+            if (idx >= 0 && idx < entities.size()) {
+                ProductEntity entity = entities.get(idx);
+                ProductEntity updatedEntity = null;
+
+                if (entity instanceof BookEntity) {
+                    Book dto = Book.fromEntity((BookEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof DiscMagEntity) {
+                    DiscMag dto = DiscMag.fromEntity((DiscMagEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof MagazineEntity) {
+                    Magazine dto = Magazine.fromEntity((MagazineEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof TicketEntity) {
+                    Ticket dto = Ticket.fromEntity((TicketEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof BatteryEntity) {
+                    Battery dto = Battery.fromEntity((BatteryEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                } else if (entity instanceof TireEntity) {
+                    Tire dto = Tire.fromEntity((TireEntity) entity);
+                    cashTill.sellItem(dto);
+                    updatedEntity = dto.toEntity();
+                }
+
+                if (updatedEntity != null) {
+                    repository.save(updatedEntity);
+                    System.out.println("Sale synchronized.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Transaction error during purchase: " + e.getMessage());
+        }
+    }
+
+    public void populate() {
+        long count = repository.count();
+        if (count > 0) {
+            System.out.println("Database already seeded. Safe boot complete.");
+            return;
+        }
+
+        System.out.println("Seeding database via Repository...");
+        Faker faker = new Faker();
+
+        try {
+            for (int i = 0; i < 2; i++) {
+                BookEntity b = new BookEntity(
+                        faker.book().title(),
+                        faker.number().randomDouble(2, 10, 50),
+                        faker.number().numberBetween(1, 20),
+                        faker.book().author()
+                );
+                repository.save(b);
+
+                MagazineEntity m = new MagazineEntity(
+                        faker.book().title() + " Monthly",
+                        faker.number().randomDouble(2, 5, 15),
+                        faker.number().numberBetween(5, 50),
+                        faker.number().numberBetween(100, 500),
+                        faker.date().past(30, TimeUnit.DAYS)
+                );
+                repository.save(m);
+
+                DiscMagEntity dm = new DiscMagEntity(
+                        "Tech Disc: " + faker.app().name(),
+                        faker.number().randomDouble(2, 10, 25),
+                        faker.number().numberBetween(5, 30),
+                        faker.number().numberBetween(50, 200),
+                        faker.date().past(60, TimeUnit.DAYS),
+                        faker.bool().bool()
+                );
+                repository.save(dm);
+
+                TicketEntity t = new TicketEntity();
+                t.setDescription("Concert: " + faker.rockBand().name());
+                t.setPrice(faker.number().randomDouble(2, 50, 150));
+                repository.save(t);
+
+                TireEntity tire = new TireEntity(
+                        faker.company().name() + " Tires",
+                        faker.number().randomDouble(2, 80, 350),
+                        faker.number().numberBetween(15, 22)
+                );
+                repository.save(tire);
+
+                BatteryEntity battery = new BatteryEntity(
+                        faker.company().name() + " Batteries",
+                        faker.number().randomDouble(2, 100, 250),
+                        faker.number().numberBetween(500, 950)
+                );
+                repository.save(battery);
+            }
+            System.out.println("Seeding complete. All products persisted directly to database via Repository.");
+        } catch (Exception e) {
+            System.out.println("Failure during database seeding: " + e.getMessage());
+        }
+    }
+
+    public SaleableItem findItem(SaleableItem item) {
+        List<ProductEntity> entities = repository.findAll();
+
+        for (ProductEntity entity : entities) {
+            SaleableItem pojo = null;
+
+            if (entity instanceof BookEntity) {
+                pojo = Book.fromEntity((BookEntity) entity);
+            } else if (entity instanceof DiscMagEntity) {
+                pojo = DiscMag.fromEntity((DiscMagEntity) entity);
+            } else if (entity instanceof MagazineEntity) {
+                pojo = Magazine.fromEntity((MagazineEntity) entity);
+            } else if (entity instanceof TicketEntity) {
+                pojo = Ticket.fromEntity((TicketEntity) entity);
+            } else if (entity instanceof BatteryEntity) {
+                pojo = Battery.fromEntity((BatteryEntity) entity);
+            } else if (entity instanceof TireEntity) {
+                pojo = Tire.fromEntity((TireEntity) entity);
+            }
+
+            if (pojo != null && pojo.equals(item)) {
+                return pojo;
+            }
+        }
+        return null;
+    }
+
+    public boolean findItemExists(SaleableItem item) {
+        return findItem(item) != null;
+    }
+
+    public SaleableItem getItem(SaleableItem item) {
+        return findItem(item);
+    }
+}
+//package bookstore;
+//
+//import bookstore.entities.*;
+//import bookstore.pojos.*;
+//import com.github.javafaker.Faker;
+//import jakarta.persistence.EntityManager;
+//import jakarta.persistence.EntityManagerFactory;
+//import jakarta.persistence.Persistence;
+//
+//import java.util.List;
+//import java.util.Scanner;
+//import java.util.concurrent.TimeUnit;
+//
+//public class App {
+//    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("bookstore-pu");
+//    private EntityManager em = emf.createEntityManager();
+//    private CashTill cashTill = new CashTill();
+//    private Scanner input = new Scanner(System.in);
+//
+//    public void run() {
+//        populate();
+//        int choice = 0;
+//        while (choice != 99) {
+//            System.out.println("\n***********************");
+//            System.out.println(" 1. Add Items (JPA Persist)");
+//            System.out.println(" 2. Edit Items (JPA Merge)");
+//            System.out.println(" 3. Delete Items (JPA Remove)");
+//            System.out.println(" 4. Sell item(s) (Logic & DB Update)");
+//            System.out.println(" 5. List items (Polymorphic JPQL)");
+//            System.out.println("99. Quit");
+//            System.out.println("***********************");
+//            System.out.print("Enter choice: \n");
+//
+//            try {
+//                String line = input.nextLine();
+//                if (line.trim().isEmpty()) continue;
+//                choice = Integer.parseInt(line.trim());
+//            } catch (NumberFormatException e) {
+//                System.out.println("Invalid input.");
+//                choice = 0;
+//            }
+//
+//            switch (choice) {
+//                case 1:
+//                    addItem();
+//                    break;
+//                case 2:
+//                    editItem();
+//                    break;
+//                case 3:
+//                    deleteItem();
+//                    break;
+//                case 4:
+//                    sellItem();
+//                    break;
+//                case 5:
+//                    listAny();
+//                    break;
+//                case 99:
+//                    // Exit
+//                    break;
+//                default:
+//                    System.out.println("Invalid choice.");
+//            }
+//        }
+//        em.close();
+//        emf.close();
+//    }
+//
+//    public void addItem() {
+//        int choice = 0;
+//        while (choice != 99) {
+//            System.out.println("\nAdd an item\n");
+//            System.out.println("1. Add Book");
+//            System.out.println("2. Add Magazine");
+//            System.out.println("3. Add DiscMag");
+//            System.out.println("4. Add Ticket");
+//            System.out.println("5. Add Tire"); // <--- ADD THIS LINE
+//            System.out.println("6. Add Battery"); // <--- ADD THIS LINE
+//            System.out.println("99. Exit");
+//
+//            try {
+//                String line = input.nextLine();
+//                if (line.trim().isEmpty()) continue;
+//                choice = Integer.parseInt(line.trim());
+//            } catch (NumberFormatException e) {
+//                choice = 0;
+//            }
+//
+//            if (choice == 99) return;
+//
+//            Editable item = null;
+//            switch(choice) {
+//                case 1: item = new Book(); break;
+//                case 2: item = new Magazine(); break;
+//                case 3: item = new DiscMag(); break;
+//                case 4: item = new Ticket(); break;
+//                case 5: item = new Tire(); break; // <--- ADD THIS LINE
+//                case 6: item = new Battery(); break; // <--- ADD THIS LINE
+//                default: System.out.println("Invalid selection."); continue;
+//            }
+//
+//            item.initialize(this.input);
+//            saveToDb(item);
+//        }
+//    }
+//
+//    private void saveToDb(Editable item) {
+//        ProductEntity entity = null;
+//        if (item instanceof Book) {
+//            entity = ((Book) item).toEntity();
+//        } else if (item instanceof DiscMag) {
+//            entity = ((DiscMag) item).toEntity();
+//        } else if (item instanceof Magazine) {
+//            entity = ((Magazine) item).toEntity();
+//        } else if (item instanceof Ticket) {
+//            entity = ((Ticket) item).toEntity();
+//        } else if (item instanceof Battery) {
+//            entity = ((Battery) item).toEntity();
+//        }
+//
+//        if (entity != null) {
+//            try {
+//                em.getTransaction().begin();
+//                em.persist(entity);
+//                em.getTransaction().commit();
+//                System.out.println("Successfully saved to Database via JPA!");
+//            } catch (Exception e) {
+//                if (em.getTransaction().isActive()) {
+//                    em.getTransaction().rollback();
+//                }
+//                System.out.println("Error persisting transaction: " + e.getMessage());
+//            }
+//        }
+//    }
+//
+//    public void listAny() {
+//        int choice = 0;
+//        while (choice != 99) {
+//            System.out.println("\nAll Items");
+//            System.out.println("-----------");
+//            System.out.println("List Options");
+//            System.out.println("1. All Products");
+//            System.out.println("2. Books Only");
+//            System.out.println("3. Magazines Only");
+//            System.out.println("4. DiscMags Only");
+//            System.out.println("5. Tickets Only");
+//            System.out.println("6. Tires Only"); // <--- ADD THIS LINE
+//            System.out.println("7. Batteries Only"); // <--- ADD THIS LINE
+//            System.out.println("99. Exit");
+//
+//            try {
+//                String line = input.nextLine();
+//                if (line.trim().isEmpty()) continue;
+//                choice = Integer.parseInt(line.trim());
+//            } catch (NumberFormatException e) {
+//                choice = 0;
+//            }
+//
+//            if (choice == 99) return;
+//
+//            Class<? extends ProductEntity> filterClass = null;
+//            switch(choice) {
+//                case 1: filterClass = ProductEntity.class; break;
+//                case 2: filterClass = BookEntity.class; break;
+//                case 3: filterClass = MagazineEntity.class; break;
+//                case 4: filterClass = DiscMagEntity.class; break;
+//                case 5: filterClass = TicketEntity.class; break;
+//                case 6: filterClass = TireEntity.class; break; // <--- ADD THIS LINE
+//                case 7: filterClass = BatteryEntity.class; break; // <--- ADD THIS LINE
+//                default: System.out.println("Invalid selection."); continue;
+//            }
+//
+//            String jpql = "SELECT p FROM ProductEntity p";
+//            if (filterClass != ProductEntity.class) {
+//                jpql = "SELECT p FROM " + filterClass.getSimpleName() + " p";
+//            }
+//
+//            List<? extends ProductEntity> dbEntities = em.createQuery(jpql, filterClass).getResultList();
+//            for (ProductEntity entity : dbEntities) {
+//                // Prevent DiscMags showing up in pure Magazine listings
+//                if (filterClass == MagazineEntity.class && entity instanceof DiscMagEntity) {
+//                    continue;
+//                }
+//                printEntityAsDto(entity);
+//            }
+//        }
+//    }
+//
+//    private void printEntityAsDto(ProductEntity entity) {
+//        if (entity instanceof BookEntity) {
+//            System.out.println(Book.fromEntity((BookEntity) entity));
+//        } else if (entity instanceof DiscMagEntity) {
+//            System.out.println(DiscMag.fromEntity((DiscMagEntity) entity));
+//        } else if (entity instanceof MagazineEntity) {
+//            System.out.println(Magazine.fromEntity((MagazineEntity) entity));
+//        } else if (entity instanceof TicketEntity) {
+//            System.out.println(Ticket.fromEntity((TicketEntity) entity));
+//        } else if (entity instanceof BatteryEntity) {
+//            System.out.println(Battery.fromEntity((BatteryEntity) entity));
+//        } else if (entity instanceof TireEntity) {
+//            System.out.println(Tire.fromEntity((TireEntity) entity));
+//        }
+//
+//    }
+//
+//    public void editItem() {
+//        List<ProductEntity> entities = em.createQuery("SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+//        if (entities.isEmpty()) {
+//            System.out.println("No records found to edit.");
+//            return;
+//        }
+//
+//        System.out.println("Select item index to edit (0 to " + (entities.size() - 1) + "):");
+//        for (int i = 0; i < entities.size(); i++) {
+//            System.out.print(i + ". ");
+//            printEntityAsDto(entities.get(i));
+//        }
+//
+//        try {
+//            int idx = Integer.parseInt(input.nextLine().trim());
+//            if (idx >= 0 && idx < entities.size()) {
+//                ProductEntity entity = entities.get(idx);
+//                em.getTransaction().begin();
+//
+//                if (entity instanceof BookEntity) {
+//                    Book dto = Book.fromEntity((BookEntity) entity);
+//                    dto.edit(this.input);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof DiscMagEntity) {
+//                    DiscMag dto = DiscMag.fromEntity((DiscMagEntity) entity);
+//                    dto.edit(this.input);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof MagazineEntity) {
+//                    Magazine dto = Magazine.fromEntity((MagazineEntity) entity);
+//                    dto.edit(this.input);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof TicketEntity) {
+//                    Ticket dto = Ticket.fromEntity((TicketEntity) entity);
+//                    dto.edit(this.input);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof BatteryEntity) {
+//                    Battery dto = Battery.fromEntity((BatteryEntity) entity);
+//                    dto.edit(this.input);
+//                    em.merge(dto.toEntity());
+//                }
+//
+//
+//                em.getTransaction().commit();
+//                System.out.println("Successfully merged updates to the database via JPA.");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Invalid selection or transaction error.");
+//            if (em.getTransaction().isActive()) {
+//                em.getTransaction().rollback();
+//            }
+//        }
+//    }
+//
+//    public void deleteItem() {
+//        List<ProductEntity> entities = em.createQuery("SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+//        if (entities.isEmpty()) {
+//            System.out.println("No records found to delete.");
+//            return;
+//        }
+//
+//        System.out.println("Select item index to delete:");
+//        for (int i = 0; i < entities.size(); i++) {
+//            System.out.print(i + ". ");
+//            printEntityAsDto(entities.get(i));
+//        }
+//
+//        try {
+//            int idx = Integer.parseInt(input.nextLine().trim());
+//            if (idx >= 0 && idx < entities.size()) {
+//                ProductEntity entity = entities.get(idx);
+//                em.getTransaction().begin();
+//                em.remove(entity);
+//                em.getTransaction().commit();
+//                System.out.println("Successfully deleted from DB via JPA.");
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Deletion error.");
+//            if (em.getTransaction().isActive()) {
+//                em.getTransaction().rollback();
+//            }
+//        }
+//    }
+//
+//    public void sellItem() {
+//        List<ProductEntity> entities = em.createQuery("SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+//        if (entities.isEmpty()) {
+//            System.out.println("No inventory found to sell.");
+//            return;
+//        }
+//
+//        System.out.println("Select item index to sell:");
+//        for (int i = 0; i < entities.size(); i++) {
+//            System.out.print(i + ". ");
+//            printEntityAsDto(entities.get(i));
+//        }
+//
+//        try {
+//            int idx = Integer.parseInt(input.nextLine().trim());
+//            if (idx >= 0 && idx < entities.size()) {
+//                ProductEntity entity = entities.get(idx);
+//                em.getTransaction().begin();
+//
+//                if (entity instanceof BookEntity) {
+//                    Book dto = Book.fromEntity((BookEntity) entity);
+//                    cashTill.sellItem(dto);
+//                    em.merge(dto.toEntity()); // Decremented stock persisted
+//                } else if (entity instanceof DiscMagEntity) {
+//                    DiscMag dto = DiscMag.fromEntity((DiscMagEntity) entity);
+//                    cashTill.sellItem(dto);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof MagazineEntity) {
+//                    Magazine dto = Magazine.fromEntity((MagazineEntity) entity);
+//                    cashTill.sellItem(dto);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof TicketEntity) {
+//                    Ticket dto = Ticket.fromEntity((TicketEntity) entity);
+//                    cashTill.sellItem(dto);
+//                    em.merge(dto.toEntity());
+//                } else if (entity instanceof BatteryEntity) {
+//                    Battery dto = Battery.fromEntity((BatteryEntity) entity);
+//                    cashTill.sellItem(dto);
+//                    em.merge(dto.toEntity());
+//                }
+//
+//
+//                em.getTransaction().commit();
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Transaction error during purchase.");
+//            if (em.getTransaction().isActive()) {
+//                em.getTransaction().rollback();
+//            }
+//        }
+//    }
+//
+//    public void populate() {
+//        long count = em.createQuery("SELECT COUNT(p) FROM ProductEntity p", Long.class).getSingleResult();
+//        if (count > 0) {
+//            System.out.println("Database already seeded. Safe boot complete.");
+//            return;
+//        }
+//
+//        System.out.println("Seeding database via JPA Hibernate mapping...");
+//        Faker faker = new Faker();
+//        em.getTransaction().begin();
+//
+//        try {
+//            for (int i = 0; i < 2; i++) {
+//                // Book
+//                BookEntity b = new BookEntity(
+//                        faker.book().title(),
+//                        faker.number().randomDouble(2, 10, 50),
+//                        faker.number().numberBetween(1, 20),
+//                        faker.book().author()
+//                );
+//                em.persist(b);
+//
+//                // Magazine
+//                MagazineEntity m = new MagazineEntity(
+//                        faker.book().title() + " Monthly",
+//                        faker.number().randomDouble(2, 5, 15),
+//                        faker.number().numberBetween(5, 50),
+//                        faker.number().numberBetween(100, 500),
+//                        faker.date().past(30, TimeUnit.DAYS)
+//                );
+//                em.persist(m);
+//
+//                // DiscMag
+//                DiscMagEntity dm = new DiscMagEntity(
+//                        "Tech Disc: " + faker.app().name(),
+//                        faker.number().randomDouble(2, 10, 25),
+//                        faker.number().numberBetween(5, 30),
+//                        faker.number().numberBetween(50, 200),
+//                        faker.date().past(60, TimeUnit.DAYS),
+//                        faker.bool().bool()
+//                );
+//                em.persist(dm);
+//
+//                // Ticket
+//                TicketEntity t = new TicketEntity();
+//                t.setDescription("Concert: " + faker.rockBand().name());
+//                t.setPrice(faker.number().randomDouble(2, 50, 150));
+//                em.persist(t);
+//
+//                // 5. Seed Tire (Automotive Department)
+//                TireEntity tire = new TireEntity(
+//                        faker.company().name() + " Tires",        // manufacturer
+//                        faker.number().randomDouble(2, 80, 350),  // price
+//                        faker.number().numberBetween(15, 22)      // diameter
+//                );
+//                em.persist(tire);
+//
+//                // 6. Seed Battery (Automotive Department - New In-Class Exercise)
+//                BatteryEntity battery = new BatteryEntity(
+//                        faker.company().name() + " Batteries",    // manufacturer
+//                        faker.number().randomDouble(2, 100, 250), // price
+//                        faker.number().numberBetween(500, 950)    // Cold Cranking Amps (CCA)
+//                );
+//                em.persist(battery);
+//
+//            }
+//            em.getTransaction().commit();
+//            System.out.println("Seeding complete. Products persisted directly to MySQL disk volume.");
+//        } catch (Exception e) {
+//            if (em.getTransaction().isActive()) {
+//                em.getTransaction().rollback();
+//            }
+//            System.out.println("Failure during database seeding: " + e.getMessage());
+//        }
+//    }
+//
+//    public SaleableItem findItem(SaleableItem item) {
+//        // Query all persistent product entities from the database
+//        List<ProductEntity> entities = em.createQuery(
+//                "SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+//
+//        for (ProductEntity entity : entities) {
+//            SaleableItem pojo = null;
+//
+//            // Map the entity back to its corresponding POJO/DTO
+//            if (entity instanceof BookEntity) {
+//                pojo = Book.fromEntity((BookEntity) entity);
+//            } else if (entity instanceof DiscMagEntity) {
+//                pojo = DiscMag.fromEntity((DiscMagEntity) entity);
+//            } else if (entity instanceof MagazineEntity) {
+//                pojo = Magazine.fromEntity((MagazineEntity) entity);
+//            } else if (entity instanceof TicketEntity) {
+//                pojo = Ticket.fromEntity((TicketEntity) entity);
+//            } else if (entity instanceof BatteryEntity) {
+//                pojo = Battery.fromEntity((BatteryEntity) entity);
+//            }
+//
+//
+//            // Check logically if this database item matches the expected item
+//            if (pojo != null && pojo.equals(item)) {
+//                return pojo;
+//            }
+//        }
+//        return null;
+//    }
+//
+//    public boolean findItemExists(SaleableItem item) {
+//        return findItem(item) != null;
+//    }
+//
+//    public SaleableItem getItem(SaleableItem item) {
+//        return findItem(item);
+//    }
+//}
+
+```
+
+--- FILE: src/main/java/bookstore/entities/BatteryEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Objects;
+
+@Entity
+public class BatteryEntity extends VehiclePartEntity {
+    @Column(name = "cold_cranking_amps", nullable = true)
+    private int coldCrankingAmps;
+
+    public int getColdCrankingAmps() {
+        return coldCrankingAmps;
+    }
+
+    public void setColdCrankingAmps(int coldCrankingAmps) {
+        this.coldCrankingAmps = coldCrankingAmps;
+    }
+
+    public BatteryEntity() {
+    }
+
+    public BatteryEntity(String manufacturer, double price, int coldCrankingAmps) {
+        super(manufacturer, price);
+        this.coldCrankingAmps = coldCrankingAmps;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        BatteryEntity that = (BatteryEntity) o;
+        return coldCrankingAmps == that.coldCrankingAmps;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), coldCrankingAmps);
+    }
+
+    @Override
+    public String toString() {
+        return "BatteryEntity{" +
+                "coldCrankingAmps=" + coldCrankingAmps +
+                "} " + super.toString();
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/BookEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Objects;
+
+@Entity
+public class BookEntity extends PublicationEntity {
+    @Column(name = "author")
+    private String author;
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public BookEntity() {
+    }
+
+    public BookEntity(String title, double price, int copies, String author) {
+        super(title, price, copies);
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        return "BookEntity{" +
+                "author='" + author + '\'' +
+                "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        BookEntity that = (BookEntity) o;
+        return Objects.equals(author, that.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(author);
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/DiscMagEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Date;
+import java.util.Objects;
+
+@Entity
+public class DiscMagEntity extends MagazineEntity {
+    @Column(name = "has_disc", nullable = true)
+    private boolean hasDisc;
+
+    public boolean getHasDisc() {
+        return hasDisc;
+    }
+
+    public void setHasDisc(boolean hasDisc) {
+        this.hasDisc = hasDisc;
+    }
+
+    public DiscMagEntity() {
+    }
+
+    public DiscMagEntity(String title, double price, int copies, int orderQty, Date currentIssue, boolean hasDisc) {
+        super(title, price, copies, orderQty, currentIssue);
+        this.hasDisc = hasDisc;
+    }
+
+    @Override
+    public String toString() {
+        return "DiscMagEntity{" +
+                "hasDisc=" + hasDisc +
+                "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DiscMagEntity that = (DiscMagEntity) o;
+        return hasDisc == that.hasDisc;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), hasDisc);
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/MagazineEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Date;
+import java.util.Objects;
+
+@Entity
+public class MagazineEntity extends PublicationEntity {
+    @Column(name = "order_qty", nullable = true)
+    private int orderQty;
+
+    @Column(name = "current_issue")
+    private Date currentIssue;
+
+    public int getOrderQty() {
+        return orderQty;
+    }
+
+    public void setOrderQty(int orderQty) {
+        this.orderQty = orderQty;
+    }
+
+    public Date getCurrentIssue() {
+        return currentIssue;
+    }
+
+    public void setCurrentIssue(Date currentIssue) {
+        this.currentIssue = currentIssue;
+    }
+
+    public MagazineEntity() {
+    }
+
+    public MagazineEntity(String title, double price, int copies, int orderQty, Date currentIssue) {
+        super(title, price, copies);
+        this.orderQty = orderQty;
+        this.currentIssue = currentIssue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        MagazineEntity that = (MagazineEntity) o;
+        return orderQty == that.orderQty && Objects.equals(currentIssue, that.currentIssue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(orderQty, currentIssue);
+    }
+
+    @Override
+    public String toString() {
+        return "MagazineEntity{" +
+                "orderQty=" + orderQty +
+                ", currentIssue=" + currentIssue +
+                "} " + super.toString();
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/ProductEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "product_entity")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public class ProductEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Column(name = "product_id")
+    private String productId;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public ProductEntity() {
+    }
+
+    public ProductEntity(String productId) {
+        this.productId = productId;
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/PublicationEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+@Entity
+public class PublicationEntity extends ProductEntity {
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "price", nullable = false)
+    private double price;
+
+    @Column(name = "copies", nullable = true)
+    private int copies;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getCopies() {
+        return copies;
+    }
+
+    public void setCopies(int copies) {
+        this.copies = copies;
+    }
+
+    public PublicationEntity(String title, double price, int copies) {
+        this.title = title;
+        this.price = price;
+        this.copies = copies;
+    }
+
+    public PublicationEntity() {
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/TicketEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+@Entity
+public class TicketEntity extends ProductEntity {
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "price")
+    private double price;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public TicketEntity() {
+    }
+
+    public TicketEntity(String description, double price) {
+        this.description = description;
+        this.price = price;
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/entities/TireEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Objects;
+
+@Entity
+public class TireEntity extends VehiclePartEntity {
+    @Column(name = "diameter", nullable = true)
+    private int diameter;
+
+    public int getDiameter() {
+        return diameter;
+    }
+
+    public void setDiameter(int diameter) {
+        this.diameter = diameter;
+    }
+
+    public TireEntity() {
+    }
+
+    public TireEntity(String manufacturer, double price, int diameter) {
+        super(manufacturer,  price);
+        this.diameter = diameter;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TireEntity that = (TireEntity) o;
+        return diameter == that.diameter;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), diameter);
+    }
+
+    @Override
+    public String toString() {
+        return "TireEntity{" +
+                "diameter=" + diameter +
+                "} " + super.toString();
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/entities/VehiclePartEntity.java ---
+```
+package bookstore.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+
+import java.util.Objects;
+
+@Entity
+public class VehiclePartEntity extends ProductEntity {
+    @Column(name = "manufacturer")
+    private String manufacturer;
+
+    @Column(name = "price", nullable = false)
+    private double price;
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public VehiclePartEntity() {
+    }
+
+    public VehiclePartEntity(String manufacturer, double price) {
+        this.manufacturer = manufacturer;
+        this.price = price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        VehiclePartEntity that = (VehiclePartEntity) o;
+        return Double.compare(price, that.price) == 0 && Objects.equals(manufacturer, that.manufacturer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(manufacturer, price);
+    }
+
+    @Override
+    public String toString() {
+        return "VehiclePartEntity{" +
+                "manufacturer='" + manufacturer + '\'' +
+                ", price=" + price +
+                "} " + super.toString();
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/jdbc/JdbcBookApp.java ---
+```
+package bookstore.jdbc;
+import bookstore.pojos.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class JdbcBookApp {
+    // Note: Port 3333 as defined in your docker-compose.yml
+    private static final String URL = "jdbc:mysql://localhost:3333/bookstore";
+    private static final String USER = "csd214";
+    private static final String PASSWORD = "itstudies12345";
+
+    public static void main(String[] args) {
+        try {
+            // 1. Ensure Table Exists
+            createTable();
+
+            // 2. Create (Insert) a Book
+            System.out.println("--- INSERTING BOOK ---");
+            Book newBook = new Book("J.R.R. Tolkien", "The Hobbit", 19.99, 10);
+            insertBook(newBook);
+            listBooks();
+
+            // 3. Edit (Update) a Book
+            // We'll update the price and copies of 'The Hobbit'
+            System.out.println("\n--- UPDATING BOOK ---");
+            newBook.setPrice(99.99);
+            newBook.setCopies(50);
+            updateBookByTitle(newBook);
+            listBooks();
+
+            // 4. Delete a Book
+            System.out.println("\n--- DELETING BOOK ---");
+            deleteBookByTitle("The Hobbit");
+            listBooks();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    private static void createTable() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS books (" +
+                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                     "title VARCHAR(255), " +
+                     "author VARCHAR(255), " +
+                     "price DOUBLE, " +
+                     "copies INT)";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table 'books' checked/created.");
+        }
+    }
+
+    private static void insertBook(Book book) throws SQLException {
+        String sql = "INSERT INTO books (title, author, price, copies) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setDouble(3, book.getPrice());
+            pstmt.setInt(4, book.getCopies());
+
+            int rows = pstmt.executeUpdate();
+            System.out.println("Inserted " + rows + " row(s).");
+        }
+    }
+
+    private static void updateBookByTitle(Book book) throws SQLException {
+        // Updating based on Title for demonstration (In real apps, use ID)
+        String sql = "UPDATE books SET price = ?, copies = ?, author = ? WHERE title = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setDouble(1, book.getPrice());
+            pstmt.setInt(2, book.getCopies());
+            pstmt.setString(3, book.getAuthor());
+            pstmt.setString(4, book.getTitle());
+
+            int rows = pstmt.executeUpdate();
+            System.out.println("Updated " + rows + " row(s) for title: " + book.getTitle());
+        }
+    }
+
+    private static void deleteBookByTitle(String title) throws SQLException {
+        String sql = "DELETE FROM books WHERE title = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, title);
+
+            int rows = pstmt.executeUpdate();
+            System.out.println("Deleted " + rows + " row(s) with title: " + title);
+        }
+    }
+
+    private static void listBooks() throws SQLException {
+        String sql = "SELECT * FROM books";
+        List<Book> books = new ArrayList<>();
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            System.out.println("Current Database Content:");
+            boolean empty = true;
+            while (rs.next()) {
+                empty = false;
+                // Reconstruct Book object from DB
+                String title = rs.getString("title");
+                String author = rs.getString("author");
+                double price = rs.getDouble("price");
+                int copies = rs.getInt("copies");
+                int id = rs.getInt("id"); // Captured but not stored in POJO currently
+
+                System.out.printf("  [ID: %d] %s by %s ($%.2f) - %d copies%n",
+                        id, title, author, price, copies);
+            }
+            if (empty) System.out.println("  (Table is empty)");
+        }
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/jdbc/JdbcFullApp.java ---
+```
+package bookstore.jdbc;
+import bookstore.pojos.*;
+
+import java.sql.*;
+
+public class JdbcFullApp {
+    private static final String URL = "jdbc:mysql://localhost:3333/bookstore";
+    private static final String USER = "csd214";
+    private static final String PASSWORD = "itstudies12345";
+
+    public static void main(String[] args) {
+        try {
+            // 1. Setup
+            createTable();
+
+            // 2. Populate
+            System.out.println("\n=== INSERTING DATA ===");
+            insertBook(new Book("George Orwell", "1984", 15.99, 10));
+            insertTicket(new Ticket()); // Description set inside helper
+            listAllItems();
+
+            // 3. LOGIC + PERSISTENCE (The "SaleableItem" demo)
+            System.out.println("\n=== SELLING ITEM (Logic + DB Update) ===");
+            sellItemFromDB("1984");
+            
+            listAllItems();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    private static void sellItemFromDB(String title) throws SQLException {
+        String selectSql = "SELECT * FROM products WHERE title = ?";
+        String updateSql = "UPDATE products SET copies = ? WHERE title = ?"; // Only updates copies for now
+        
+        try (Connection conn = getConnection(); 
+             PreparedStatement psSelect = conn.prepareStatement(selectSql)) {
+            
+            // A. LOAD
+            psSelect.setString(1, title);
+            ResultSet rs = psSelect.executeQuery();
+            
+            if (rs.next()) {
+                String type = rs.getString("product_type");
+                SaleableItem item = null;
+
+                // factory logic (simplified)
+                if ("BOOK".equals(type)) {
+                    Book b = new Book();
+                    b.setTitle(rs.getString("title"));
+                    b.setCopies(rs.getInt("copies"));
+                    b.setPrice(rs.getDouble("price"));
+                    b.setAuthor(rs.getString("author"));
+                    item = b;
+                }
+                
+                if (item != null) {
+                    System.out.println("Loaded from DB: " + item);
+                    
+                    // B. LOGIC (Interface method)
+                    item.sellItem(); // Decrements copies in Java object
+                    
+                    // C. PERSISTENCE (Save changes)
+                    if (item instanceof Publication) {
+                        try (PreparedStatement psUpdate = conn.prepareStatement(updateSql)) {
+                            psUpdate.setInt(1, ((Publication) item).getCopies());
+                            psUpdate.setString(2, title);
+                            psUpdate.executeUpdate();
+                            System.out.println("Database updated with new copy count.");
+                        }
+                    }
+                }
+            } else {
+                System.out.println("Item not found: " + title);
+            }
+        }
+    }
+
+    private static void createTable() throws SQLException {
+        String dropSql = "DROP TABLE IF EXISTS products";
+        String createSql = "CREATE TABLE products (" +
+                     "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                     "product_type VARCHAR(50), " + 
+                     "price DOUBLE, " +
+                     "title VARCHAR(255), " +      
+                     "copies INT, " +              
+                     "author VARCHAR(255), " +
+                     "order_qty INT, " +
+                     "issue_date DATE, " +
+                     "has_disc BOOLEAN, " +
+                     "description VARCHAR(255)" +  
+                     ")";
+        
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+            stmt.execute(dropSql);
+            stmt.execute(createSql);
+            System.out.println("Table 'products' reset.");
+        }
+    }
+
+    // --- INSERT METHODS (Simplified for brevity) ---
+    private static void insertBook(Book b) throws SQLException {
+        String sql = "INSERT INTO products (product_type, title, price, copies, author) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "BOOK");
+            ps.setString(2, b.getTitle());
+            ps.setDouble(3, b.getPrice());
+            ps.setInt(4, b.getCopies());
+            ps.setString(5, b.getAuthor());
+            ps.executeUpdate();
+        }
+    }
+
+    private static void insertTicket(Ticket t) throws SQLException {
+        t.setDescription("Concert Ticket");
+        t.setPrice(75.00);
+        String sql = "INSERT INTO products (product_type, description, price) VALUES (?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "TICKET");
+            ps.setString(2, t.getDescription());
+            ps.setDouble(3, t.getPrice());
+            ps.executeUpdate();
+        }
+    }
+
+    private static void listAllItems() throws SQLException {
+        String sql = "SELECT * FROM products";
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            System.out.println("--- DB Inventory ---");
+            while (rs.next()) {
+                String type = rs.getString("product_type");
+                if ("BOOK".equals(type)) {
+                    System.out.println("Book: " + rs.getString("title") + " | Copies: " + rs.getInt("copies"));
+                } else if ("TICKET".equals(type)) {
+                    System.out.println("Ticket: " + rs.getString("description"));
+                }
+            }
+        }
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/jdbc/JdbcWidgetApp.java ---
+```
+package bookstore.jdbc;
+
+import bookstore.pojos.Widget;
+import java.sql.*;
+
+public class JdbcWidgetApp {
+    private static final String URL = "jdbc:mysql://localhost:3333/bookstore";
+    private static final String USER = "csd214";
+    private static final String PASS = "itstudies12345";
+
+    public static void main(String[] args) {
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASS)) {
+            // 1. Setup Table
+            createTable(conn);
+
+            // 2. Create (Insert)
+            System.out.println("\n--- INSERTING ---");
+            Widget w1 = new Widget("Industrial Widget", 49.99);
+            insertWidget(conn, w1);
+
+            // 3. Read (Select)
+            System.out.println("\n--- READING ---");
+            listWidgets(conn);
+
+            // 4. Update
+            System.out.println("\n--- UPDATING ---");
+            updateWidgetPrice(conn, "Industrial Widget", 55.00);
+
+            // 5. Delete
+            System.out.println("\n--- DELETING ---");
+            deleteWidget(conn, "Industrial Widget");
+            listWidgets(conn);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void createTable(Connection conn) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS widgets (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "product_id VARCHAR(36), " + // Column for our UUID
+                "widget_name VARCHAR(255), " +
+                "price DOUBLE)";
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table 'widgets' is ready.");
+        }
+    }
+
+    private static void insertWidget(Connection conn, Widget w) throws SQLException {
+        // SECURITY: Use ? placeholders to prevent SQL Injection
+        String sql = "INSERT INTO widgets (product_id, widget_name, price) VALUES (?, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, w.getProductId()); // The UUID String from the POJO
+            ps.setString(2, w.getWidgetName());
+            ps.setDouble(3, w.getPrice());
+            ps.executeUpdate();
+            System.out.println("Widget saved to DB: " + w.getWidgetName());
+        }
+    }
+
+    private static void listWidgets(Connection conn) throws SQLException {
+        String sql = "SELECT * FROM widgets";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                System.out.printf("DB ID: %d | UUID: %s | Name: %s | Price: $%.2f%n",
+                        rs.getInt("id"),
+                        rs.getString("product_id"),
+                        rs.getString("widget_name"),
+                        rs.getDouble("price"));
+            }
+        }
+    }
+
+    private static void updateWidgetPrice(Connection conn, String name, double newPrice) throws SQLException {
+        String sql = "UPDATE widgets SET price = ? WHERE widget_name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, newPrice);
+            ps.setString(2, name);
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("Updated " + rowsAffected + " record(s).");
+        }
+    }
+
+    private static void deleteWidget(Connection conn, String name) throws SQLException {
+        String sql = "DELETE FROM widgets WHERE widget_name = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.executeUpdate();
+            System.out.println("Deleted widget: " + name);
+        }
+    }
+}
+
+
+```
+
+--- FILE: src/main/java/bookstore/jpa/JpaAutomotiveApp.java ---
+```
+package bookstore.jpa;
+
+import bookstore.entities.TireEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import java.util.List;
+
+public class JpaAutomotiveApp {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("bookstore-pu");
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            // --- CREATE ---
+            System.out.println("\n[Step 1] Persisting a new Tire...");
+            em.getTransaction().begin();
+            TireEntity myTire = new TireEntity("Michelin", 249.99, 18);
+            em.persist(myTire); // Hibernate generates INSERT
+            em.getTransaction().commit();
+            System.out.println("Tire saved with Database Primary Key ID: " + myTire.getId());
+
+            // --- READ ---
+            listTires(em, "[Step 2] Database Tires:");
+
+            // --- UPDATE (Dirty Checking / Managed Entities) ---
+            System.out.println("\n[Step 3] Editing Tire Price (Dirty Checking)...");
+            em.getTransaction().begin();
+            TireEntity managedTire = em.find(TireEntity.class, myTire.getId());
+            if (managedTire != null) {
+                managedTire.setPrice(199.99); // Changing Java field updates DB on commit
+            }
+            em.getTransaction().commit();
+            listTires(em, "[Step 4] After Price Update:");
+
+            // --- DELETE ---
+            System.out.println("\n[Step 5] Deleting the Tire...");
+            em.getTransaction().begin();
+            TireEntity target = em.find(TireEntity.class, myTire.getId());
+            if (target != null) {
+                em.remove(target); // Hibernate generates DELETE
+            }
+            em.getTransaction().commit();
+            listTires(em, "[Step 6] After Deletion:");
+
+        } finally {
+            em.close();
+            emf.close();
+        }
+    }
+
+    private static void listTires(EntityManager em, String header) {
+        System.out.println("\n" + header);
+        List<TireEntity> tires = em.createQuery("SELECT t FROM TireEntity t", TireEntity.class).getResultList();
+        if (tires.isEmpty()) {
+            System.out.println("No tires found.");
+        } else {
+            tires.forEach(t -> System.out.println(" > " + t.getManufacturer() + " ($" + t.getPrice() + ")"));
+        }
+    }
+} 
+
+
+```
+
+--- FILE: src/main/java/bookstore/jpa/JpaBookApp.java ---
+```
+package bookstore.jpa;
+
+import bookstore.entities.BookEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+
+import java.util.List;
+
+public class JpaBookApp {
+    public static void main(String[] args) {
+        // 1. Start Hibernate (Loads persistence.xml)
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("bookstore-pu");
+        EntityManager em = emf.createEntityManager();
+        // 2. Create Data
+        em.getTransaction().begin();
+        BookEntity book = new BookEntity();
+        book.setPrice(34.99);
+        book.setCopies(10);
+        book.setAuthor("Maria Batista");
+        em.persist(book);
+        em.getTransaction().commit();
+
+        // 3. Read Data (Polymorphic check)
+        // Notice we can query specifically for Widgets
+        List<BookEntity> books = em.createQuery(
+                "SELECT w FROM BookEntity w", BookEntity.class).getResultList();
+
+        for (BookEntity b : books) {
+            System.out.println("Found: " + b);
+        }
+
+        em.close();
+
+
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/Main.java ---
+```
+package bookstore;
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Bookstore Application Started");
+        App app = new App();
+        try {
+            app.run();
+        } finally {
+            app.shutdown();
+        }
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/pojos/Battery.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.BatteryEntity;
+
+import java.util.Objects;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link BatteryEntity}
+ */
+public class Battery extends VehiclePart{
+    private int coldCrankingAmps;
+
+    public Battery() {
+    }
+
+    public Battery(int coldCrankingAmps) {
+        this.coldCrankingAmps = coldCrankingAmps;
+    }
+
+    public Battery(String manufacturer, double price, int coldCrankingAmps) {
+        super(manufacturer, price);
+        this.coldCrankingAmps = coldCrankingAmps;
+    }
+
+    @Override
+    public String toString() {
+        return "Battery{" +
+                "coldCrankingAmps=" + coldCrankingAmps +
+                "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Battery battery = (Battery) o;
+        return coldCrankingAmps == battery.coldCrankingAmps;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), coldCrankingAmps);
+    }
+
+    public int getColdCrankingAmps() {
+        return coldCrankingAmps;
+    }
+
+    public void setColdCrankingAmps(int coldCrankingAmps) {
+        this.coldCrankingAmps = coldCrankingAmps;
+    }
+
+    @Override
+    public void initialize(Scanner input) {
+        // Pass scanner up to parent
+        super.initialize(input);
+        System.out.println("Enter Cold Cranking Amps:");
+        this.coldCrankingAmps = getInput(input, 0);
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        super.edit(input);
+        System.out.println("Enter Cold Cranking Amps:");
+        this.coldCrankingAmps = getInput(input, getColdCrankingAmps());
+    }
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling a Battery");
+    }
+
+    // Add to src/main/java/bookstore/pojos/Battery.java
+
+    public bookstore.entities.BatteryEntity toEntity() {
+        bookstore.entities.BatteryEntity entity = new bookstore.entities.BatteryEntity();
+        entity.setId(this.getDbId()); // Inherited from Product DTO
+        entity.setProductId(this.getProductId()); // Inherited from Product DTO
+        entity.setManufacturer(this.getManufacturer()); // Inherited from VehiclePart DTO
+        entity.setPrice(this.getPrice()); // Inherited from VehiclePart DTO
+        entity.setColdCrankingAmps(this.getColdCrankingAmps());
+        return entity;
+    }
+
+    public static Battery fromEntity(bookstore.entities.BatteryEntity entity) {
+        Battery battery = new Battery(
+                entity.getManufacturer(),
+                entity.getPrice(),
+                entity.getColdCrankingAmps()
+        );
+        battery.setDbId(entity.getId());
+        battery.setProductId(entity.getProductId());
+        return battery;
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Book.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.BookEntity;
+import java.util.Objects;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.BookEntity}
+ */
+public class Book extends Publication {
+    private String author = "";
+
+    public Book() {
+        super();
+    }
+
+    public Book(String author) {
+        this.author = author;
+    }
+
+    public Book(String author, String title, double price, int copies) {
+        super(title, price, copies);
+        this.author = author;
+    }
+
+    // Mapping: DTO to Database Entity
+    public BookEntity toEntity() {
+        BookEntity entity = new BookEntity();
+        entity.setId(this.getDbId());
+        entity.setProductId(this.getProductId());
+        entity.setTitle(this.getTitle());
+        entity.setPrice(this.getPrice());
+        entity.setCopies(this.getCopies());
+        entity.setAuthor(this.getAuthor());
+        return entity;
+    }
+
+    // Mapping: Database Entity to DTO
+    public static Book fromEntity(BookEntity entity) {
+        Book book = new Book(
+                entity.getAuthor(),
+                entity.getTitle(),
+                entity.getPrice(),
+                entity.getCopies()
+        );
+        book.setDbId(entity.getId());
+        book.setProductId(entity.getProductId());
+        return book;
+    }
+
+    @Override
+    public void initialize(Scanner input) {
+        super.initialize(input);
+
+        System.out.println("Enter Author:");
+        this.author = getInput(input, "Unknown Author");
+
+        super.initPriceCopies(input);
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        super.edit(input);
+        System.out.println("Edit Author [" + this.author + "]:");
+        this.author = getInput(input, this.author);
+    }
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling Book: " + getTitle() + " by " + author);
+        setCopies(getCopies() - 1);
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{author='" + author + "', " + super.toString() + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Book)) return false;
+        if (!super.equals(o)) return false;
+        Book book = (Book) o;
+        return Objects.equals(author, book.author);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), author);
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/CashTill.java ---
+```
+package bookstore.pojos;
+
+public class CashTill {
+    private double runningTotal;
+
+    public CashTill() {
+        this.runningTotal = 0.0;
+    }
+
+    public void showTotal() {
+        System.out.println("Current Cash Till Total: $" + runningTotal);
+    }
+
+    public void sellItem(SaleableItem item) {
+        item.sellItem();
+        runningTotal += item.getPrice();
+        System.out.println("Added $" + item.getPrice() + " to till.");
+    }
+
+    public double getRunningTotal() {
+        return runningTotal;
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/DiscMag.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.DiscMagEntity;
+import java.util.Date;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.DiscMagEntity}
+ */
+public class DiscMag extends Magazine {
+    private boolean hasDisc;
+
+    public DiscMag() {
+    }
+
+    public DiscMag(boolean hasDisc, int orderQty, Date currentIssue, String title, double price, int copies) {
+        super(orderQty, currentIssue, title, price, copies);
+        this.hasDisc = hasDisc;
+    }
+
+    // Mapping: DTO to Database Entity
+    public DiscMagEntity toEntity() {
+        DiscMagEntity entity = new DiscMagEntity();
+        entity.setId(this.getDbId());
+        entity.setProductId(this.getProductId());
+        entity.setTitle(this.getTitle());
+        entity.setPrice(this.getPrice());
+        entity.setCopies(this.getCopies());
+        entity.setOrderQty(this.getOrderQty());
+        entity.setCurrentIssue(this.getCurrentIssue());
+        entity.setHasDisc(this.isHasDisc());
+        return entity;
+    }
+
+    // Mapping: Database Entity to DTO
+    public static DiscMag fromEntity(DiscMagEntity entity) {
+        DiscMag dm = new DiscMag(
+                entity.getHasDisc(),
+                entity.getOrderQty(),
+                entity.getCurrentIssue(),
+                entity.getTitle(),
+                entity.getPrice(),
+                entity.getCopies()
+        );
+        dm.setDbId(entity.getId());
+        dm.setProductId(entity.getProductId());
+        return dm;
+    }
+
+    public void initialize(Scanner input) {
+        super.initialize(input);
+
+        System.out.println("Has Disc? (true/false):");
+        this.hasDisc = getInput(input, false);
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        super.edit(input);
+
+        System.out.println("Edit Has Disc [" + this.hasDisc + "]:");
+        this.hasDisc = getInput(input, this.hasDisc);
+    }
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling Disc Magazine (Disc: " + hasDisc + ")");
+        setCopies(getCopies() - 1);
+    }
+
+    public boolean isHasDisc() { return hasDisc; }
+    public void setHasDisc(boolean h) { this.hasDisc = h; }
+
+    @Override
+    public String toString() {
+        return "DiscMag{hasDisc=" + hasDisc + ", " + super.toString() + "}";
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Editable.java ---
+```
+package bookstore.pojos;
+
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Scanner;
+
+public abstract class Editable implements Serializable, SaleableItem {
+
+    // REMOVED: public Scanner input = new Scanner(System.in);
+    // REMOVED: setSystemInput() - No longer needed, we inject manually.
+
+    // 1. Update Abstract Methods to accept the dependency
+    public abstract void edit(Scanner input);
+    public abstract void initialize(Scanner input);
+
+    // 2. Update Helper methods to use the passed Scanner
+    public String getInput(Scanner input, String defaultValue) {
+        // Handle empty buffer issues by reading raw
+        String ss = input.nextLine();
+        if (ss.trim().isEmpty()) {
+            return defaultValue;
+        }
+        // Return the raw string (no need for second scanner here usually)
+        return ss.trim();
+    }
+
+    public int getInput(Scanner input, int defaultValue) {
+        String s = input.nextLine();
+        if (s.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Integer.parseInt(s.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public double getInput(Scanner input, double defaultValue) {
+        String s = input.nextLine();
+        if (s.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(s.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    public boolean getInput(Scanner input, boolean defaultValue) {
+        String s = input.nextLine();
+        if (s.trim().isEmpty()) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(s.trim());
+    }
+
+    public Date getInput(Scanner input, Date defaultValue) {
+        String s = input.nextLine();
+        if (s.trim().isEmpty()) {
+            return defaultValue;
+        }
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+        try {
+            return formatter.parse(s.trim());
+        } catch (ParseException e) {
+            System.out.println("Invalid Date. Keeping default.");
+            return defaultValue;
+        }
+    }
+}
+```
+
+--- FILE: src/main/java/bookstore/pojos/Magazine.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.MagazineEntity;
+import java.util.Date;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.MagazineEntity}
+ */
+public class Magazine extends Publication {
+    private int orderQty = 0;
+    private Date currentIssue = new Date();
+
+    public Magazine() {
+    }
+
+    public Magazine(int orderQty, Date currentIssue, String title, double price, int copies) {
+        super(title, price, copies);
+        this.orderQty = orderQty;
+        this.currentIssue = currentIssue;
+    }
+
+    // Mapping: DTO to Database Entity
+    public MagazineEntity toEntity() {
+        MagazineEntity entity = new MagazineEntity();
+        entity.setId(this.getDbId());
+        entity.setProductId(this.getProductId());
+        entity.setTitle(this.getTitle());
+        entity.setPrice(this.getPrice());
+        entity.setCopies(this.getCopies());
+        entity.setOrderQty(this.getOrderQty());
+        entity.setCurrentIssue(this.getCurrentIssue());
+        return entity;
+    }
+
+    // Mapping: Database Entity to DTO
+    public static Magazine fromEntity(MagazineEntity entity) {
+        Magazine mag = new Magazine(
+                entity.getOrderQty(),
+                entity.getCurrentIssue(),
+                entity.getTitle(),
+                entity.getPrice(),
+                entity.getCopies()
+        );
+        mag.setDbId(entity.getId());
+        mag.setProductId(entity.getProductId());
+        return mag;
+    }
+
+    @Override
+    public void initialize(Scanner input) {
+        super.initialize(input); // Title
+
+        System.out.println("Enter Order Qty:");
+        this.orderQty = getInput(input, 0);
+
+        System.out.println("Enter Current Issue Date (dd-MMM-yyyy):");
+        this.currentIssue = getInput(input, new Date());
+
+        super.initPriceCopies(input); // Copies, Price
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        super.edit(input); // Title, Price, Copies
+
+        System.out.println("Edit Order Qty [" + this.orderQty + "]:");
+        this.orderQty = getInput(input, this.orderQty);
+
+        System.out.println("Edit Issue Date [" + this.currentIssue + "]:");
+        this.currentIssue = getInput(input, this.currentIssue);
+    }
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling Magazine: " + getTitle());
+        setCopies(getCopies() - 1);
+    }
+
+    public int getOrderQty() { return orderQty; }
+    public void setOrderQty(int o) { this.orderQty = o; }
+    public Date getCurrentIssue() { return currentIssue; }
+    public void setCurrentIssue(Date d) { this.currentIssue = d; }
+
+    @Override
+    public String toString() {
+        return "Magazine{orderQty=" + orderQty + ", issue=" + currentIssue + ", " + super.toString() + "}";
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Product.java ---
+```
+package bookstore.pojos;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+/**
+ * DTO for {@link bookstore.entities.ProductEntity}
+ * Separation of Concerns: Handles Console Presentation & I/O
+ */
+public abstract class Product extends Editable implements SaleableItem, Serializable {
+    private Long dbId; // Primary key link for database synchronization
+    private String productId; // UUID
+
+    public Product() {
+        setProductId(UUID.randomUUID().toString());
+    }
+
+    public Long getDbId() {
+        return dbId;
+    }
+
+    public void setDbId(Long dbId) {
+        this.dbId = dbId;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "dbId=" + dbId +
+                ", productId='" + productId + '\'' +
+                "} ";
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Publication.java ---
+```
+package bookstore.pojos;
+
+import java.util.Objects;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.PublicationEntity}
+ */
+public abstract class Publication extends Product {
+    private String title = "";
+    private double price = 0.0;
+    private int copies = 0;
+
+    public Publication() {
+    }
+
+    public Publication(String title, double price, int copies) {
+        this.title = title;
+        this.price = price;
+        this.copies = copies;
+    }
+
+
+//    // Helper used by subclasses during initialize
+//    protected void initPriceCopies() {
+//        System.out.println("Enter copies:");
+//        this.copies = getInput(0);
+//
+//        System.out.println("Enter price:");
+//        this.price = getInput(0.0);
+//    }
+
+    @Override
+    public void initialize(Scanner input) {
+        System.out.println("Enter Title:");
+        this.title = getInput(input, "Available Title");
+    }
+
+    // Pass scanner to helper
+    protected void initPriceCopies(Scanner input) {
+        System.out.println("Enter copies:");
+        this.copies = getInput(input, 0);
+
+        System.out.println("Enter price:");
+        this.price = getInput(input, 0.0);
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        System.out.println("Edit Title [" + this.title + "]:");
+        this.title = getInput(input, this.title);
+
+        System.out.println("Edit Price [" + this.price + "]:");
+        this.price = getInput(input, this.price);
+
+        System.out.println("Edit Copies [" + this.copies + "]:");
+        this.copies = getInput(input, this.copies);
+    }
+    @Override
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getCopies() {
+        return copies;
+    }
+
+    public void setCopies(int copies) {
+        this.copies = copies;
+    }
+
+    @Override
+    public String toString() {
+        return "Publication{" +
+                "title='" + title + '\'' +
+                ", price=" + price +
+                ", copies=" + copies +
+                "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Publication)) return false;
+        Publication that = (Publication) o;
+        return Double.compare(that.price, price) == 0 &&
+                copies == that.copies &&
+                Objects.equals(title, that.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, price, copies);
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/SaleableItem.java ---
+```
+package bookstore.pojos;
+
+public interface SaleableItem {
+    void sellItem();
+    double getPrice();
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Ticket.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.TicketEntity;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.TicketEntity}
+ */
+public class Ticket extends Product {
+    private String description = "";
+    private double price = 0.0;
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling Ticket: " + description + " for " + price);
+    }
+
+    @Override
+    public double getPrice() {
+        return price;
+    }
+
+    // Mapping: DTO to Database Entity
+    public TicketEntity toEntity() {
+        TicketEntity entity = new TicketEntity();
+        entity.setId(this.getDbId());
+        entity.setProductId(this.getProductId());
+        entity.setDescription(this.getDescription());
+        entity.setPrice(this.getPrice());
+        return entity;
+    }
+
+    // Mapping: Database Entity to DTO
+    public static Ticket fromEntity(TicketEntity entity) {
+        Ticket t = new Ticket();
+        t.setDbId(entity.getId());
+        t.setProductId(entity.getProductId());
+        t.setDescription(entity.getDescription());
+        t.setPrice(entity.getPrice());
+        return t;
+    }
+
+    @Override
+    public void initialize(Scanner input) {
+        System.out.println("Enter Description:");
+        this.description = getInput(input, "Ticket");
+
+        System.out.println("Enter Price:");
+        this.price = getInput(input, 0.0);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        System.out.println("Edit Description [" + this.description + "]:");
+        this.description = getInput(input, this.description);
+
+        System.out.println("Edit Price [" + this.price + "]:");
+        this.price = getInput(input, this.price);
+    }
+
+    @Override
+    public String toString() {
+        return "Ticket{desc='" + description + "', price=" + price + "}";
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Tire.java ---
+```
+package bookstore.pojos;
+
+import bookstore.entities.TireEntity;
+
+import java.util.Objects;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.TireEntity}
+ */
+public class Tire extends VehiclePart{
+    private int diameter;
+
+    public Tire() {
+    }
+
+    public Tire(int diameter) {
+        this.diameter = diameter;
+    }
+
+    public Tire(String manufacturer, double price, int diameter) {
+        super(manufacturer, price);
+        this.diameter = diameter;
+    }
+
+    @Override
+    public String toString() {
+        return "Tire{" +
+                "diameter=" + diameter +
+                "} " + super.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Tire tire = (Tire) o;
+        return diameter == tire.diameter;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), diameter);
+    }
+
+    public int getDiameter() {
+        return diameter;
+    }
+
+    public void setDiameter(int diameter) {
+        this.diameter = diameter;
+    }
+
+    @Override
+    public void initialize(Scanner input) {
+        // Pass scanner up to parent
+        super.initialize(input);
+
+        System.out.println("Enter Diameter:");
+        this.diameter = getInput(input, 0);
+
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        super.edit(input);
+        System.out.println("Enter Diameter:");
+        this.diameter = getInput(input, getDiameter());
+
+    }
+
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling a Tire");
+    }
+
+    // Add to src/main/java/bookstore/pojos/Tire.java
+    public TireEntity toEntity() {
+        TireEntity entity = new TireEntity();
+        entity.setId(this.getDbId()); // Map base long ID
+        entity.setProductId(this.getProductId()); // Map base String UUID
+        entity.setManufacturer(this.getManufacturer());
+        entity.setPrice(this.getPrice());
+        entity.setDiameter(this.getDiameter());
+        return entity;
+    }
+
+    public static Tire fromEntity(TireEntity entity) {
+        Tire tire = new Tire(
+                entity.getManufacturer(),
+                entity.getPrice(),
+                entity.getDiameter()
+        );
+        tire.setDbId(entity.getId());
+        tire.setProductId(entity.getProductId());
+        return tire;
+    }
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/VehiclePart.java ---
+```
+package bookstore.pojos;
+
+import java.util.Objects;
+import java.util.Scanner;
+
+/**
+ * DTO for {@link bookstore.entities.VehiclePartEntity}
+ */
+public abstract class VehiclePart extends Product {
+    private String manufacturer;
+    private double price;
+
+    public String getManufacturer() {
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer) {
+        this.manufacturer = manufacturer;
+    }
+
+    @Override
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        VehiclePart that = (VehiclePart) o;
+        return Double.compare(price, that.price) == 0 && Objects.equals(manufacturer, that.manufacturer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(manufacturer, price);
+    }
+
+    @Override
+    public String toString() {
+        return "VehiclePart{" +
+                "manufacturer='" + manufacturer + '\'' +
+                ", price=" + price +
+                "} " + super.toString();
+    }
+
+    public VehiclePart() {
+    }
+    public VehiclePart(String manufacturer, double price) {
+        this.manufacturer = manufacturer;
+        this.price = price;
+    }
+    @Override
+    public void initialize(Scanner input) {
+        System.out.println("Enter Manufacturer");
+        this.manufacturer= getInput(input, "Unknown Manufacturer");
+
+        System.out.println("Enter Price");
+        this.price= getInput(input, 0.0);
+
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        System.out.println("Enter Manufacturer");
+        this.manufacturer= getInput(input, getManufacturer());
+        System.out.println("Enter Price");
+        this.price= getInput(input, getPrice());
+    }
+
+
+
+}
+
+```
+
+--- FILE: src/main/java/bookstore/pojos/Widget.java ---
+```
+package bookstore.pojos;
+
+import java.util.Objects;
+import java.util.Scanner;
+
+public class Widget extends Product {
+    private String widgetName;
+    private double price;
+
+    public Widget() {
+        super();
+        this.widgetName = "Default Widget";
+    }
+
+    public Widget(String widgetName, double price) {
+        super(); // Generates the UUID productId
+        this.widgetName = widgetName;
+        this.price = price;
+    }
+
+    public String getWidgetName() { return widgetName; }
+    public void setWidgetName(String widgetName) { this.widgetName = widgetName; }
+
+    @Override
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    @Override
+    public void initialize(Scanner input) {
+        System.out.println("Enter Widget Name:");
+        this.widgetName = getInput(input, "New Widget");
+        System.out.println("Enter Widget Price:");
+        this.price = getInput(input, 0.0);
+    }
+
+    @Override
+    public void edit(Scanner input) {
+        System.out.println("Edit Widget Name [" + widgetName + "]:");
+        this.widgetName = getInput(input, this.widgetName);
+        System.out.println("Edit Price [" + price + "]:");
+        this.price = getInput(input, this.price);
+    }
+
+    @Override
+    public void sellItem() {
+        System.out.println("Selling Widget: " + widgetName);
+    }
+
+    @Override
+    public String toString() {
+        return "Widget{name='" + widgetName + "', price=" + price + "} " + super.toString();
+    }
+}
+
+
+```
+
+--- FILE: src/main/java/bookstore/repositories/IRepository.java ---
+```
+//package bookstore.repositories;
+//
+//import java.util.List;
+//
+//public interface IRepository<T> {
+//    T save(T entity);
+//    T findById(Long id);
+//    List<T> findAll();
+//    void delete(Long id);
+//    void close();
+//}
+package bookstore.repositories;
+
+import java.util.List;
+
+public interface IRepository<T> {
+    T save(T entity);
+    T findById(Long id);
+    List<T> findAll();
+    void delete(Long id);
+    long count();
+    int deleteAll();
+    void close();
+}
+```
+
+--- FILE: src/main/java/bookstore/repositories/ProductRepository.java ---
+```
+package bookstore.repositories;
+
+import bookstore.entities.ProductEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Persistence;
+import java.util.List;
+
+public class ProductRepository implements IRepository<ProductEntity> {
+    private final EntityManagerFactory emf;
+    private final EntityManager em;
+
+    public ProductRepository() {
+        this.emf = Persistence.createEntityManagerFactory("bookstore-pu");
+        this.em = emf.createEntityManager();
+    }
+
+    @Override
+    public ProductEntity save(ProductEntity entity) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            if (entity.getId() == null) {
+                em.persist(entity); // INSERT
+            } else {
+                entity = em.merge(entity); // UPDATE (Dirty Checking)
+            }
+            tx.commit();
+            return entity;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        }
+    }
+
+    @Override
+    public ProductEntity findById(Long id) {
+        return em.find(ProductEntity.class, id);
+    }
+
+    @Override
+    public List<ProductEntity> findAll() {
+        return em.createQuery("SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+    }
+
+    @Override
+    public void delete(Long id) {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            ProductEntity entity = em.find(ProductEntity.class, id);
+            if (entity != null) {
+                em.remove(entity);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        }
+    }
+
+    @Override
+    public long count() {
+        return em.createQuery("SELECT COUNT(p) FROM ProductEntity p", Long.class)
+                .getSingleResult();
+    }
+
+    @Override
+    public int deleteAll() {
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            int deletedCount = em.createQuery("DELETE FROM ProductEntity").executeUpdate();
+            tx.commit();
+            return deletedCount;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            throw e;
+        }
+    }
+
+    @Override
+    public void close() {
+        if (em != null && em.isOpen()) em.close();
+        if (emf != null && emf.isOpen()) emf.close();
+    }
+}
+//package bookstore.repositories;
+//
+//import bookstore.entities.ProductEntity;
+//import jakarta.persistence.EntityManager;
+//import jakarta.persistence.EntityManagerFactory;
+//import jakarta.persistence.EntityTransaction;
+//import jakarta.persistence.Persistence;
+//import java.util.List;
+//
+//public class ProductRepository implements IRepository<ProductEntity> {
+//    private final EntityManagerFactory emf;
+//    private final EntityManager em;
+//
+//    public ProductRepository() {
+//        this.emf = Persistence.createEntityManagerFactory("bookstore-pu");
+//        this.em = emf.createEntityManager();
+//    }
+//
+//    @Override
+//    public ProductEntity save(ProductEntity entity) {
+//        EntityTransaction tx = em.getTransaction();
+//        try {
+//            tx.begin();
+//            // The "Upsert" (Update or Insert) Strategy
+//            if (entity.getId() == null) {
+//                em.persist(entity); // Insert new row
+//            } else {
+//                entity = em.merge(entity); // Update existing row
+//            }
+//            tx.commit();
+//            return entity;
+//        } catch (Exception e) {
+//            if (tx.isActive()) tx.rollback();
+//            throw e;
+//        }
+//    }
+//
+//    @Override
+//    public ProductEntity findById(Long id) {
+//        return em.find(ProductEntity.class, id);
+//    }
+//
+//    @Override
+//    public List<ProductEntity> findAll() {
+//        return em.createQuery("SELECT p FROM ProductEntity p", ProductEntity.class).getResultList();
+//    }
+//
+//    @Override
+//    public void delete(Long id) {
+//        EntityTransaction tx = em.getTransaction();
+//        try {
+//            tx.begin();
+//            ProductEntity entity = em.find(ProductEntity.class, id);
+//            if (entity != null) {
+//                em.remove(entity);
+//            }
+//            tx.commit();
+//        } catch (Exception e) {
+//            if (tx.isActive()) tx.rollback();
+//            throw e;
+//        }
+//    }
+//
+//    @Override
+//    public void close() {
+//        if (em != null && em.isOpen()) em.close();
+//        if (emf != null && emf.isOpen()) emf.close();
+//    }
+//}
+
+```
+
+--- FILE: src/main/java/bookstore/repositories/RepositoryApp.java ---
+```
+package bookstore.repositories;
+
+import bookstore.entities.*;
+
+import java.util.Date;
+import java.util.List;
+
+public class RepositoryApp {
+    public static void main(String[] args) {
+        System.out.println("Repository Pattern Demo");
+
+        // 1. Instantiate Repository
+        IRepository<ProductEntity> repo = new ProductRepository();
+
+        try {
+            // 2. Create Items
+            System.out.println("\n--- Saving Items ---");
+            repo.save(new BookEntity("Clean Code",45.00,10,"Robert C. Martin"));
+            repo.save(new TicketEntity("Java Conference", 299.99));
+            repo.save(new DiscMagEntity("Retro Gamer", 15.00, 20, 100, new Date(), true));
+
+            // 3. List All (Polymorphic)
+            System.out.println("\n--- All Items ---");
+            List<ProductEntity> items = repo.findAll();
+            for (ProductEntity p : items) {
+                System.out.println(p);
+            }
+
+            // 4. Update
+            if (!items.isEmpty()) {
+                ProductEntity first = items.getFirst();
+                System.out.println("\n--- Updating Item ID: " + first.getId() + " ---");
+
+                if (first instanceof TicketEntity) {
+                    ((TicketEntity) first).setPrice(10.00);
+                } else if (first instanceof PublicationEntity) {
+                    ((PublicationEntity) first).setPrice(999.99);
+                }
+
+                repo.save(first);
+                System.out.println("Updated: " + repo.findById(first.getId()));
+            }
+
+            // 5. Delete
+            if (items.size() > 1) {
+                Long idToDelete = items.get(1).getId();
+                System.out.println("\n--- Deleting Item ID: " + idToDelete + " ---");
+                repo.delete(idToDelete);
+            }
+
+            // 6. List again
+            System.out.println("\n--- Remaining Items ---");
+            repo.findAll().forEach(System.out::println);
+
+        } finally {
+            repo.close();
+        }
+    }
+}
+
+```
+
+--- FILE: src/main/resources/META-INF/persistence.xml ---
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+             version="3.0">
+
+    <persistence-unit name="bookstore-pu">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <properties>
+            <!-- Database Connection (Matches Docker Port 3333) -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="jakarta.persistence.jdbc.url"    value="jdbc:mysql://localhost:3333/bookstore" />
+            <property name="jakarta.persistence.jdbc.user"   value="csd214" />
+            <property name="jakarta.persistence.jdbc.password" value="itstudies12345" />
+
+            <!-- Hibernate Settings -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+            <property name="hibernate.show_sql" value="true" />
+            <!-- This auto-creates tables for your entities -->
+            <property name="hibernate.hbm2ddl.auto" value="create" />
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+--- FILE: src/test/java/bookstore/AppTest.java ---
+```
+package bookstore;
+
+import bookstore.pojos.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class AppTest {
+    private final InputStream originalSystemIn = System.in;
+
+    @AfterEach
+    void tearDown() {
+        System.setIn(originalSystemIn);
+    }
+
+    @Test
+    void testAppFlow_AddAndEditBook() {
+        // 1. Build the Clean Script
+        StringBuilder script = new StringBuilder();
+
+        // --- ADD BOOK ---
+        script.append("1\n");             // Main Menu: Add Items
+        script.append("1\n");             // Add Menu: Add Book
+        script.append("Dune\n");          // Title
+        script.append("Frank Herbert\n"); // Author
+        script.append("10\n");            // Copies
+        script.append("25.00\n");         // Price
+        script.append("99\n");            // Exit Add Menu
+
+        // --- EDIT BOOK ---
+        script.append("2\n");             // Main Menu: Edit Items
+        script.append("0\n");             // Select Index 0
+        script.append("Dune Messiah\n");  // Change Title
+        script.append("\n");              // Price: Keep
+        script.append("\n");              // Copies: Keep
+        script.append("\n");              // Author: Keep
+
+        // --- QUIT ---
+        script.append("99\n");            // Quit
+
+        // 2. Inject
+        System.setIn(new ByteArrayInputStream(script.toString().getBytes()));
+
+        // 3. Run
+        App app = new App() {
+            @Override
+            public void populate() { /* clean start */ }
+        };
+        app.run();
+
+        // 4. Verify
+        Book expected = new Book("Frank Herbert", "Dune Messiah", 25.00, 10);
+        SaleableItem result = app.findItem(expected);
+
+        assertNotNull(result);
+        assertEquals("Dune Messiah", ((Book)result).getTitle());
+    }
+}
+```
+
+--- FILE: src/test/java/bookstore/pojos/BatteryTest.java ---
+```
+package bookstore.pojos;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.util.Scanner;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class BatteryTest {
+    @Test
+    void testBatteryInitialization() {
+        // 1. Prepare the Script (Title -> Manufacturer -> Price -> Diameter)
+        // Based on the "Bucket Brigade" order in VehiclePart and Tire
+        String inputData =  "Duracell\n180.00\n850\n";
+
+        // 2. Create the Mock Dependency
+        Scanner mockScanner = new Scanner(new ByteArrayInputStream(inputData.getBytes()));
+
+        // 3. Execute
+        Battery battery=new Battery();
+        battery.initialize(mockScanner); // Injection!
+
+        // 4. Verify (Assert)
+        assertEquals("Duracell", battery.getManufacturer());
+        assertEquals(850, battery.getColdCrankingAmps());
+        assertEquals(180.00, battery.getPrice(), 0.001);
+    }
+
+
+}
+```
+
+--- FILE: src/test/java/bookstore/pojos/BookTest.java ---
+```
+package bookstore.pojos;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.util.Scanner;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class BookTest {
+
+    // Helper method to create bookstore-2026-01-30.mmd Scanner from bookstore-2026-01-30.mmd String
+    private Scanner createMockScanner(String input) {
+        return new Scanner(new ByteArrayInputStream(input.getBytes()));
+    }
+
+    @Test
+    void testConstructorAndGetters() {
+        // Standard OOP test - no Scanner involved
+        Book book = new Book("Frank Herbert", "Dune", 50.0, 10);
+
+        assertEquals("Dune", book.getTitle());
+        assertEquals("Frank Herbert", book.getAuthor());
+        assertEquals(50.0, book.getPrice());
+        assertEquals(10, book.getCopies());
+    }
+
+    @Test
+    void testInitialize_PopulatesFieldsCorrectly() {
+        // 1. Prepare the Script
+        // Order in Code:
+        //   1. super.initialize() -> Title
+        //   2. this.initialize()  -> Author
+        //   3. super.initPriceCopies() -> Copies
+        //   4. super.initPriceCopies() -> Price
+        String inputData = "Dune\nFrank Herbert\n10\n25.00\n";
+        Scanner mockScanner = createMockScanner(inputData);
+
+        // 2. Execute
+        Book book = new Book();
+        book.initialize(mockScanner); // Dependency Injection!
+
+        // 3. Verify
+        assertEquals("Dune", book.getTitle());
+        assertEquals("Frank Herbert", book.getAuthor());
+        assertEquals(10, book.getCopies());
+        assertEquals(25.00, book.getPrice(), 0.001);
+    }
+
+    @Test
+    void testEdit_UpdatesFieldsAndKeepsOthers() {
+        // 1. Setup Initial State
+        Book book = new Book("Old Author", "Old Title", 10.0, 5);
+
+        // 2. Prepare the Script
+        // Order in Code:
+        //   1. super.edit() -> Title
+        //   2. super.edit() -> Price
+        //   3. super.edit() -> Copies
+        //   4. this.edit()  -> Author
+
+        // Scenario: Change Title to "New Title", Keep Price, Keep Copies, Change Author
+        String inputData = "New Title\n\n\nNew Author\n";
+        Scanner mockScanner = createMockScanner(inputData);
+
+        // 3. Execute
+        book.edit(mockScanner);
+
+        // 4. Verify
+        assertEquals("New Title", book.getTitle());   // Changed
+        assertEquals(10.0, book.getPrice(), 0.001);   // Kept (from \n)
+        assertEquals(5, book.getCopies());            // Kept (from \n)
+        assertEquals("New Author", book.getAuthor()); // Changed
+    }
+
+    @Test
+    void testSellItem_DecrementsCopies() {
+        Book book = new Book("Author", "Title", 10.0, 5);
+        book.sellItem();
+        assertEquals(4, book.getCopies());
+    }
+}
+```
+
+--- FILE: src/test/java/bookstore/pojos/TireTest.java ---
+```
+package bookstore.pojos;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.util.Scanner;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class TireTest {
+    @Test
+    void testTireEdit() {
+        //..
+
+    }
+
+        @Test
+    void testTireInitialization() {
+        // 1. Prepare the Script (Title -> Manufacturer -> Price -> Diameter)
+        // Based on the "Bucket Brigade" order in VehiclePart and Tire
+        String inputData = "Michelin\n250.00\n18\n";
+
+        // 2. Create the Mock Dependency
+        Scanner mockScanner = new Scanner(new ByteArrayInputStream(inputData.getBytes()));
+
+        // 3. Execute
+        Tire tire = new Tire();
+        tire.initialize(mockScanner); // Injection!
+
+        // 4. Verify (Assert)
+        assertEquals("Michelin", tire.getManufacturer());
+        assertEquals(18, tire.getDiameter());
+        assertEquals(250.00, tire.getPrice(), 0.001);
+    }
+
+
+}
+```
+

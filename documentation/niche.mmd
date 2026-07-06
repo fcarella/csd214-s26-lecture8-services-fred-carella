@@ -1,0 +1,57 @@
+classDiagram
+    SaleableItem <|.. Editable
+    Serializable <|.. Editable
+    Editable <|-- Product
+    Product <|-- VehiclePart
+    VehiclePart <|-- Tire
+    VehiclePart <|-- Battery
+
+    class SaleableItem {
+        <<interface>>
+        +sellItem()
+        +getPrice() double
+    }
+
+    class Editable {
+        <<abstract>>
+        +edit(Scanner input)*
+        +initialize(Scanner input)*
+    }
+
+    class Product {
+        <<abstract>>
+        -String productId
+    }
+
+    class VehiclePart {
+        <<abstract>>
+        -String manufacturer
+        -double price
+        +VehiclePart()
+        +VehiclePart(String manufacturer, double price)
+        +getPrice() double
+    }
+
+    class Tire {
+        -int diameter
+        +Tire()
+        +Tire(int diameter, String manufacturer, double price)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+    }
+
+    class Battery {
+        -int coldCrankingAmps
+        +Battery()
+        +Battery(int cca, String manufacturer, double price)
+        +initialize(Scanner input)
+        +edit(Scanner input)
+        +sellItem()
+    }
+
+    class CashTill {
+        +sellItem(SaleableItem item)
+    }
+
+    Product <-- CashTill
