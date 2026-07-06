@@ -4,6 +4,8 @@ import bookstore.entities.ProductEntity;
 import bookstore.pojos.*;
 import bookstore.repositories.IRepository;
 import bookstore.repositories.InMemoryListRepository;
+import bookstore.services.AutomotiveService;
+import bookstore.services.BookstoreService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,10 +50,15 @@ class AppTest {
         // 2. Inject
         System.setIn(new ByteArrayInputStream(script.toString().getBytes()));
 
-        // 3. Inject Volatile In-Memory Repository Strategy to keep the test decoupled [6]
-        IRepository<ProductEntity> repository = new InMemoryListRepository();
+// Inside AppTest.java testAppFlow_AddAndEditBook()
 
-        App app = new App(repository) {
+// 1. Instantiate in-memory repository and mock services for test isolation
+        IRepository<ProductEntity> repository = new InMemoryListRepository();
+        BookstoreService bookstoreService = new BookstoreService(repository);
+        AutomotiveService automotiveService = new AutomotiveService(repository);
+
+// 2. Inject all three dependencies into the test instance
+        App app = new App(repository, bookstoreService, automotiveService) {
             @Override
             public void populate() { /* clean start */ }
         };

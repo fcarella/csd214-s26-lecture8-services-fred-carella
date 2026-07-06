@@ -4,6 +4,8 @@ import bookstore.entities.*;
 import bookstore.pojos.*;
 import bookstore.repositories.IRepository;
 import bookstore.repositories.ProductRepository;
+import bookstore.services.AutomotiveService;
+import bookstore.services.BookstoreService;
 import com.github.javafaker.Faker;
 
 import java.util.List;
@@ -11,14 +13,23 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class App {
-    private final IRepository<ProductEntity> repository; // Clean abstraction [6]
+    private final IRepository<ProductEntity> repository;
+    private final BookstoreService bookstoreService;
+    private final AutomotiveService automotiveService;
     private final CashTill cashTill = new CashTill();
     private final Scanner input = new Scanner(System.in);
 
-    // CONSTRUCTOR INJECTION: App declares its data dependency [6]
-    public App(IRepository<ProductEntity> repository) {
+
+    // Constructor Injection of multiple dependencies [6]
+    public App(IRepository<ProductEntity> repository,
+               BookstoreService bookstoreService,
+               AutomotiveService automotiveService) {
         this.repository = repository;
+        this.bookstoreService = bookstoreService;
+        this.automotiveService = automotiveService;
+
     }
+
 
     public void run() {
         populate();
@@ -30,6 +41,7 @@ public class App {
             System.out.println(" 3. Delete Items (Repository Delete)");
             System.out.println(" 4. Sell item(s) (Logic & Repo Sync)");
             System.out.println(" 5. List items (Polymorphic Filtering)");
+            System.out.println(" 6. Apply Discount");
             System.out.println("99. Quit");
             System.out.println("***********************");
             System.out.print("Enter choice: \n");
@@ -43,29 +55,53 @@ public class App {
                 choice = 0;
             }
 
+// Inside App.java run() menu loop
             switch (choice) {
-                case 1:
-                    addItem();
-                    break;
-                case 2:
-                    editItem();
-                    break;
-                case 3:
-                    deleteItem();
-                    break;
-                case 4:
-                    sellItem();
-                    break;
-                case 5:
-                    listAny();
-                    break;
-                case 99:
-                    break;
-                default:
-                    System.out.println("Invalid choice.");
+                case 1: addItem(); break;
+                case 2: editItem(); break;
+                case 3: deleteItem(); break;
+                case 4: sellItem(); break;
+                case 5: listAny(); break;
+                case 6: discountFeature(); break; // <--- ADD THIS CHOICE [6]
+                case 99: break;
+                default: System.out.println("Invalid choice.");
             }
+
+
         }
     }
+// Add to src/main/java/bookstore/App.java
+
+    public void discountFeature() {
+        // 1. Fetch clean database entities from the repository
+        List<ProductEntity> results = repository.findAll();
+        if (results.isEmpty()) {
+            System.out.println("No records found to discount.");
+            return;
+        }
+
+        // 2. Display selection menu
+        System.out.println("Select item index to apply a 10% discount:");
+        for (int i = 0; i < results.size(); i++) {
+            System.out.print(i + ". ");
+            printEntityAsDto(results.get(i));
+        }
+
+        try {
+            int idx = Integer.parseInt(input.nextLine().trim());
+            if (idx >= 0 && idx < results.size()) {
+                Long dbId = results.get(idx).getId();
+
+                // 3. DELEGATE: The Waiter tells the Chef what to do [6]
+                bookstoreService.applyDiscount(dbId, 0.10);
+            } else {
+                System.out.println("Invalid index selection.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid numeric input.");
+        }
+    }
+
 
     public void shutdown() {
         repository.close();
